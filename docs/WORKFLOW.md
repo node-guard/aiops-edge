@@ -16,7 +16,8 @@ The human who starts an agent session is accountable for what it produces and re
 
 ## 2. Branching, commits, PRs
 
-- Trunk-based: `main` is always green and demo-able. Short-lived branches: `feat/S3-B2-outbox`, `fix/S5-A2-revoked-cert`, `docs/S1-J1-readme`.
+- `main` is the demo/release branch and is always green; `dev` is the integration branch. Both are protected: a PR is required, the `python` and `gitleaks` checks must pass, and only squash merges are allowed.
+- Short-lived branches come from `dev` and target `dev`: `feat/S3-B2-outbox`, `fix/S5-A2-revoked-cert`, `docs/S1-J1-readme`. At each sprint demo/checkpoint, open a `dev` → `main` PR so `main` matches what was demonstrated. Never push directly to `main` or `dev`.
 - One task = one branch = one PR, ideally < 400 changed lines. Split larger work.
 - Conventional Commits with task ID: `feat(edge): transactional outbox [S3-B2]`. Types: feat, fix, test, docs, refactor, chore, ci.
 - PR needs: linked task ID, acceptance criteria checklist, "How I verified" (commands + results), "Not verified / known gaps", contract/ADR impact, security impact (yes/no).
