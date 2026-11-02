@@ -28,11 +28,6 @@ services:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.central
-      # Lab workaround: on this host the bridge network cannot query DNS (UDP/53
-      # is dropped for the docker subnet), which breaks `pip install` during the
-      # build. The build only needs outbound HTTPS; runtime stays on the compose
-      # network. Remove this once the host firewall/DNS path is fixed.
-      network: host
     command: ["uvicorn", "aiops.central.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
     environment:
       DATABASE_URL: postgresql+psycopg://aiops:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/aiops
@@ -59,7 +54,6 @@ services:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.central
-      network: host # see the api build comment
     command: ["python", "-m", "aiops.central.worker.main"]
     environment:
       DATABASE_URL: postgresql+psycopg://aiops:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/aiops
