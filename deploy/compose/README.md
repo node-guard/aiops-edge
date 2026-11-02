@@ -66,10 +66,9 @@ the browser. Migration-head checking is added with the Alembic baseline (S1-A2).
 - `api` unhealthy but `postgres` healthy → check `logs api`; the usual cause is a
   `DATABASE_URL` with the wrong host or password.
 - Build fails with `Temporary failure in name resolution` while pip installs
-  dependencies → the docker bridge network cannot reach DNS on this host. The
-  compose file sets `build.network: host` as a workaround; the real fix is in the
-  host firewall (UDP/53 from the docker subnet is dropped). Remove the workaround
-  once the host resolves DNS from containers again.
+  dependencies → containers have no outbound network. On a host running `ufw`,
+  the fix is `sudo ufw default allow routed` (inbound stays denied). Verify with
+  `docker run --rm alpine nslookup pypi.org`.
 - Ports 80/443 already in use → stop whatever serves them (another Caddy, a local
   reverse proxy) before `make up`.
 - Caddy uses its internal CA for `localhost`; `curl -k` is expected.
