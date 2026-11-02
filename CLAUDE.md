@@ -29,14 +29,14 @@ Edge sites (independent K3s clusters) run local observability, ML anomaly detect
 - Requirements conflict between PRD, SPEC and BACKLOG: report the conflict; do not silently choose.
 
 ## How to work (the loop)
-1. Pick the task ID from `docs/BACKLOG.md` (or use `/next-task`). One task per branch/PR.
+1. Pick the task ID from `docs/BACKLOG.md` (or use `/next-task`). One task per branch/PR; branch from `dev` and target `dev` (`dev` is merged into `main` at demos/checkpoints).
 2. Restate acceptance criteria in 3-5 bullets and list files you will touch. For non-trivial tasks, write the plan to the PR description before coding.
 3. **Test first** where practical (unit for logic, contract tests for schemas, security tests for boundaries).
 4. Implement the smallest change that satisfies the criteria. No drive-by refactors.
 5. Run `make check` (lint + types + tests + schema validation). Fix before proceeding.
 6. Update docs/contracts/ADR touched by the change. Update `docs/BACKLOG.md` status.
 7. Commit with Conventional Commits and the task ID: `feat(edge): add outbox transaction [S3-B2]`.
-8. Open a PR using the template; list what you verified and what you did not.
+8. Open a PR against `dev` using the template; list what you verified and what you did not.
 
 ## Commands
 ```bash
@@ -64,4 +64,4 @@ Acceptance criteria met and demonstrated; tests added and passing; `make check` 
 Student A: `src/aiops/central/**`, `web/**`. Student B: `src/aiops/edge/**`, `deploy/**`, `experiments/**`. Shared: `contracts/**`, `src/aiops/contracts/**`, `src/aiops/common/**`, `tests/security/**`, `docs/**` (both review). See `.github/CODEOWNERS`.
 
 ## Pointers
-Architecture diagrams: `docs/ARCHITECTURE.md`. Faults: `docs/FAULT_MATRIX.md`. Experiments and hypotheses: `docs/EXPERIMENTS.md`. Prompts: `prompts/`. Slash commands: `.claude/commands/`. Subagents: `.claude/agents/`.
+Architecture diagrams: `docs/ARCHITECTURE.md`. Faults: `docs/FAULT_MATRIX.md`. Experiments and hypotheses: `docs/EXPERIMENTS.md`. Prompts: `prompts/`. Agent config: OpenCode reads `AGENTS.md` and enforces `opencode.json`; Claude Code uses `.claude/settings.json`, with slash commands in `.claude/commands/` and subagents in `.claude/agents/`.
