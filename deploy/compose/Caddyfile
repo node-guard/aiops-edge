@@ -1,5 +1,6 @@
 # Replace localhost with your central hostname. mTLS for /edge/v1 is configured in S5.
 localhost {
-  reverse_proxy /api/* api:8000
-  reverse_proxy /edge/* api:8000
+	reverse_proxy /api/* api:8000
+	reverse_proxy /edge/* api:8000
+	reverse_proxy /health/* api:8000
 }

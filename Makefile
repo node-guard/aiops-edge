@@ -25,11 +25,15 @@ check: lint types schemas test test-sec
 fmt:
 	uv run ruff format src tests experiments
 
+# `docker compose` looks for `.env` next to compose.yaml; ours is at the repo
+# root, so pass it explicitly for interpolation.
+COMPOSE := docker compose --env-file .env -f deploy/compose/compose.yaml
+
 up:
-	docker compose -f deploy/compose/compose.yaml up -d --build
+	$(COMPOSE) up -d --build
 
 down:
-	docker compose -f deploy/compose/compose.yaml down
+	$(COMPOSE) down
 
 lab-up:
 	bash deploy/lab/lab-up.sh

@@ -1,0 +1,23 @@
+# Keep the image build context small: the Dockerfile only copies
+# pyproject.toml and src/, so everything else is excluded.
+.git
+.github
+.gitignore
+.venv
+**/__pycache__
+**/*.pyc
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.pre-commit-config.yaml
+docs
+web
+experiments
+tests
+scripts
+prompts
+contracts
+*.md
+.env
+.env.*
+secrets
