@@ -18,7 +18,10 @@ This file is for coding agents other than Claude Code (Codex, Cursor, Copilot ag
 ```bash
 make setup && make check
 ```
-One task per branch; task IDs live in `docs/BACKLOG.md`; commits use Conventional Commits with the task ID; open PRs with `.github/pull_request_template.md`.
+One task per branch, branched from `dev`; task IDs live in `docs/BACKLOG.md`; commits use Conventional Commits with the task ID; open PRs against `dev` with `.github/pull_request_template.md`.
+
+## Agent configuration
+OpenCode permissions and instructions live in `opencode.json`; Claude Code permissions live in `.claude/settings.json`. Both deny reading `.env*`, `secrets/`, private keys and kubeconfigs, and forbid force-pushes. Slash commands and subagents under `.claude/` are Claude Code-specific; OpenCode uses `AGENTS.md` plus `CLAUDE.md` (loaded through `opencode.json`).
 
 ## Stop and ask a human when
 A change touches security boundaries, RBAC, policy semantics or the autonomy matrix; a schema change is not backward compatible; an ADR-worthy decision appears; requirements conflict.
