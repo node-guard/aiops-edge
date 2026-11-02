@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiops.local/schemas/rca-report.v1.schema.json",
+  "title": "Structured RCA report v1",
+  "type": "object",
+  "required": ["investigation_id", "status", "summary", "root_cause_candidates", "confirmed_facts", "hypotheses", "alternative_hypotheses", "missing_evidence", "limitations"],
+  "additionalProperties": false,
+  "properties": {
+    "investigation_id": {"type": "string"},
+    "status": {"enum": ["confirmed", "probable", "inconclusive", "unknown"]},
+    "summary": {"type": "string"},
+    "root_cause_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "fault_type", "rank", "evidence_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {"type": "string"},
+          "fault_type": {"type": "string"},
+          "rank": {"type": "integer", "minimum": 1},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "confirmed_facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["statement", "evidence_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "statement": {"type": "string"},
+          "evidence_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+        }
+      }
+    },
+    "hypotheses": {"type": "array", "items": {"type": "string"}},
+    "alternative_hypotheses": {"type": "array", "items": {"type": "string"}},
+    "missing_evidence": {"type": "array", "items": {"type": "string"}},
+    "proposed_action": {
+      "type": ["object", "null"],
+      "required": ["action_id", "parameters"],
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {"enum": ["ACT-001", "ACT-002", "ACT-003"]},
+        "parameters": {"type": "object"}
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-11-10T09-00-F01-r01",
+  "fault_id": "F01",
+  "seed": 42,
+  "target": "aiops-test/shop-demo",
+  "t_injection": "2026-11-10T09:05:00Z",
+  "t_impact": "2026-11-10T09:05:20Z",
+  "t_detection": null,
+  "t_verified_recovery": null,
+  "variant": "ml-b2",
+  "config_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "component_versions": {"detector": "0.1.0", "k3s": "pin-me"},
+  "valid": true,
+  "invalid_reason": null
+}

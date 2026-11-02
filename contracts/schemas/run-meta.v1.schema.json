@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiops.local/schemas/run-meta.v1.schema.json",
+  "title": "Experiment run metadata v1",
+  "type": "object",
+  "required": ["run_id", "fault_id", "target", "t_injection", "config_hash", "component_versions", "valid"],
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {"type": "string"},
+    "fault_id": {"type": "string", "pattern": "^F[0-9]{2}$"},
+    "seed": {"type": "integer"},
+    "target": {"type": "string"},
+    "t_injection": {"type": "string", "format": "date-time"},
+    "t_impact": {"type": ["string", "null"], "format": "date-time"},
+    "t_detection": {"type": ["string", "null"], "format": "date-time"},
+    "t_verified_recovery": {"type": ["string", "null"], "format": "date-time"},
+    "variant": {"type": "string"},
+    "config_hash": {"type": "string"},
+    "component_versions": {"type": "object"},
+    "valid": {"type": "boolean"},
+    "invalid_reason": {"type": ["string", "null"]}
+  }
+}

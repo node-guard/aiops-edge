@@ -1,0 +1,37 @@
+# Action catalogue (source of truth). Anything not listed is L3 (prohibited).
+version: 1
+actions:
+  - id: ACT-001
+    name: restart_deployment
+    version: "1"
+    description: Restart an allowlisted stateless Deployment via rollout annotation.
+    target: {kind: Deployment, namespaces: [aiops-test], allowlist_required: true}
+    parameters: {}
+    default_level: L1
+    tier: M
+  - id: ACT-002
+    name: scale_deployment
+    version: "1"
+    description: Scale an allowlisted Deployment through the scale subresource within min/max.
+    target: {kind: Deployment, namespaces: [aiops-test], allowlist_required: true}
+    parameters:
+      replicas: {type: integer, minimum: 0, maximum: 10}
+    default_level: L2
+    level_rules:
+      - when: "scale_out_by <= 1 and new_replicas <= max_replicas"
+        level: L1
+    tier: M
+  - id: ACT-003
+    name: rollback_deployment
+    version: "1"
+    description: Roll back a Deployment to its previous known revision.
+    target: {kind: Deployment, namespaces: [aiops-test], allowlist_required: true}
+    parameters: {}
+    default_level: L2
+    tier: P1
+prohibited:
+  - arbitrary_shell
+  - unrestricted_kubectl
+  - cluster_admin
+  - delete_pv_or_namespace
+  - broad_resource_mutation

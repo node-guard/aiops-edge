@@ -1,0 +1,34 @@
+# Machine-readable autonomy matrix. Keep in sync with docs/AUTONOMY_MATRIX.md (a test compares them).
+version: 1
+policy_version: "1"
+validity_hours: 24
+clock_skew_tolerance_seconds: 30
+command_expiry_seconds: 300
+allowed_namespaces: [aiops-test]
+limits:
+  cooldown_seconds_per_target: 600
+  max_l1_per_target_per_hour: 2
+  max_l1_per_site_per_hour: 6
+actions:
+  ACT-001:
+    level: L1
+    offline_allowed: true
+    local_triggers:
+      - fingerprint: app.health_check.failed
+      - fingerprint: workload.memory_pressure   # F02: memory growth toward limit, not a limit misconfiguration
+    # Deliberately NOT local triggers: CrashLoopBackOff, OOMKilled, ErrImagePull, dependency outage.
+    # A restart does not fix them (F12-F15); they go to agent RCA and escalation.
+  ACT-002:
+    level: L2
+    offline_allowed: false
+    l1_exception:
+      scale_out_max_delta: 1
+      require_new_replicas_lte: max_replicas
+      offline_allowed: true
+    local_triggers:
+      - fingerprint: node.cpu_saturation
+        with: workload_latency_or_health_degraded
+  ACT-003:
+    level: L2
+    offline_allowed: false
+    tier: P1

@@ -1,0 +1,11 @@
+# Replace the placeholders with real GitHub handles (without angle brackets).
+/src/aiops/central/   @student-a
+/web/                 @student-a
+/src/aiops/edge/      @student-b
+/deploy/              @student-b
+/experiments/         @student-b
+/contracts/           @student-a @student-b
+/src/aiops/contracts/ @student-a @student-b
+/src/aiops/common/    @student-a @student-b
+/tests/security/      @student-a @student-b
+/docs/                @student-a @student-b

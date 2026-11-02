@@ -1,0 +1,16 @@
+{
+  "investigation_id": "c0ffee00-1111-4222-8333-444455556666",
+  "status": "probable",
+  "summary": "CPU saturation on the worker node caused by the shop-demo load generator; latency rose after replicas stayed at 1.",
+  "root_cause_candidates": [
+    {"entity_id": "5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22", "fault_type": "cpu_saturation", "rank": 1, "evidence_ids": ["ev-001", "ev-002"]}
+  ],
+  "confirmed_facts": [
+    {"statement": "Node CPU p95 stayed above 95% for 8 minutes.", "evidence_ids": ["ev-001"]}
+  ],
+  "hypotheses": ["Load increased without capacity headroom."],
+  "alternative_hypotheses": ["Noisy neighbour pod on the same node."],
+  "missing_evidence": ["Per-pod CPU breakdown for the last 10 minutes."],
+  "proposed_action": {"action_id": "ACT-002", "parameters": {"replicas": 2}},
+  "limitations": ["Single node observed; no cross-node comparison."]
+}

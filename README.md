@@ -1,0 +1,43 @@
+# Agentic AIOps for Edge Environments
+
+Master PFE project: an Edge-first AIOps platform. Local sites keep monitoring, anomaly detection, incident persistence and bounded recovery when the central link is down; a central platform runs an evidence-grounded LLM investigation agent and the approval flow. The AI never holds infrastructure write power.
+
+## Start here
+| If you want to... | Read |
+|---|---|
+| Understand the product and scope | [`docs/PRD.md`](docs/PRD.md) |
+| Build against the technical contract | [`docs/SPEC.md`](docs/SPEC.md) |
+| See diagrams | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Know what runs offline and who decides | [`docs/AUTONOMY_MATRIX.md`](docs/AUTONOMY_MATRIX.md) |
+| Work with a coding agent | [`CLAUDE.md`](CLAUDE.md), [`AGENTS.md`](AGENTS.md), [`docs/WORKFLOW.md`](docs/WORKFLOW.md) |
+| Pick the next task | [`docs/BACKLOG.md`](docs/BACKLOG.md) |
+| Run experiments | [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md), [`docs/FAULT_MATRIX.md`](docs/FAULT_MATRIX.md) |
+| See past decisions | [`docs/adr/`](docs/adr) |
+
+## Quick start
+```bash
+cp .env.example .env     # fill local values; never commit
+make setup               # uv sync, pre-commit
+make check               # lint + types + unit tests + schema validation
+make up                  # central stack (Docker Compose)
+make lab-up              # QEMU/K3s lab (see deploy/lab/README.md)
+```
+
+## Repo layout
+```text
+contracts/      JSON schemas, examples, action catalogue, autonomy/policy YAML (source of truth)
+docs/           PRD, SPEC, ARCHITECTURE, WORKFLOW, BACKLOG, ADRs, experiments
+src/aiops/      contracts, common, central (api, worker, agent, remediation, db), edge (detector, processor, connector, policy, executor, console_api)
+web/            React dashboard + local console page
+deploy/         compose, helm edge-stack, QEMU lab scripts
+experiments/    fault scripts, harness, analysis, run metadata
+prompts/        agent prompts and injection tests
+tests/          unit, integration, security, e2e
+.claude/        slash commands and subagents for Claude Code
+```
+
+## Status
+Baseline docs v1.0 (2026-11-02). Sprint status lives in `docs/BACKLOG.md`.
+
+## Team
+Student A (central + AI), Student B (edge + ML), supervisor Prof. Badiâa Dellal-Hedjazi.

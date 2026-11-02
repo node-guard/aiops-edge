@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiops.local/schemas/command-envelope.v1.schema.json",
+  "title": "Command envelope v1",
+  "type": "object",
+  "required": ["command_id", "command_type", "site_id", "issued_at", "expires_at", "idempotency_key", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "command_id": {"type": "string", "format": "uuid"},
+    "command_type": {"enum": ["remediation.execute", "diagnostic.run"]},
+    "site_id": {"type": "string", "format": "uuid"},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "idempotency_key": {"type": "string", "format": "uuid"},
+    "payload": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"command_type": {"const": "remediation.execute"}}},
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["action_id", "action_version", "target", "parameters", "policy_version", "approval_id"],
+            "additionalProperties": false,
+            "properties": {
+              "action_id": {"enum": ["ACT-001", "ACT-002", "ACT-003"]},
+              "action_version": {"type": "string"},
+              "target": {
+                "type": "object",
+                "required": ["namespace", "resource_kind", "resource_uid"],
+                "additionalProperties": false,
+                "properties": {
+                  "namespace": {"type": "string"},
+                  "resource_kind": {"const": "Deployment"},
+                  "resource_uid": {"type": "string"}
+                }
+              },
+              "parameters": {"type": "object"},
+              "policy_version": {"type": "string"},
+              "approval_id": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"command_type": {"const": "diagnostic.run"}}},
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["tool", "arguments"],
+            "additionalProperties": false,
+            "properties": {
+              "tool": {"enum": ["get_node_metrics", "get_node_status", "get_container_metrics", "get_pod_status", "get_previous_container_logs", "search_application_logs", "get_service_health", "get_network_metrics", "get_recent_deployments"]},
+              "arguments": {"type": "object"},
+              "max_bytes": {"type": "integer", "minimum": 1, "maximum": 65536}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

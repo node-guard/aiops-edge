@@ -1,0 +1,13 @@
+{
+  "command_id": "9b1e2d3c-4f5a-4b6c-8d7e-0f1a2b3c4d66",
+  "command_type": "diagnostic.run",
+  "site_id": "2f0a6a43-7a56-4b43-9a2d-6f1d3b0e1a11",
+  "issued_at": "2026-11-02T10:31:00Z",
+  "expires_at": "2026-11-02T10:32:00Z",
+  "idempotency_key": "0e1d2c3b-4a59-4687-8796-a5b4c3d2e177",
+  "payload": {
+    "tool": "get_node_metrics",
+    "arguments": {"node_id": "5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22", "metric_set": "cpu", "window_seconds": 600},
+    "max_bytes": 16384
+  }
+}

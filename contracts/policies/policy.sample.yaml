@@ -1,0 +1,11 @@
+# Sample per-site allowlist and bounds consumed by the policy engine (extends autonomy.yaml).
+site_policy:
+  policy_version: "1"
+  targets:
+    - namespace: aiops-test
+      kind: Deployment
+      name: shop-demo
+      uid_pinned: true
+      min_replicas: 1
+      max_replicas: 4
+      stateless: true

@@ -1,0 +1,27 @@
+{
+  "specversion": "1.0",
+  "id": "8d0f6f1e-3c11-4c0e-9d5e-0b7d6a9d1f01",
+  "source": "urn:aiops:site:2f0a6a43-7a56-4b43-9a2d-6f1d3b0e1a11:ml-detector",
+  "type": "com.aiops.node.anomaly.detected.v1",
+  "subject": "node/5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22",
+  "time": "2026-11-02T10:30:00Z",
+  "datacontenttype": "application/json",
+  "data": {
+    "observed_at": "2026-11-02T10:30:15Z",
+    "severity": "warning",
+    "entity": {"kind": "node", "id": "5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22"},
+    "payload": {
+      "model_id": "node-isolation-forest",
+      "model_version": "1.0.0",
+      "feature_schema_version": "1",
+      "anomaly_score": -0.41,
+      "threshold": -0.30,
+      "window_seconds": 300,
+      "top_features": [
+        {"name": "cpu_util_p95_ratio", "deviation": 6.2},
+        {"name": "load_per_core", "deviation": 4.8},
+        {"name": "mem_available_ratio", "deviation": 0.4}
+      ]
+    }
+  }
+}

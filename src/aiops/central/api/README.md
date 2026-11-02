@@ -1,0 +1,1 @@
+# central/api: FastAPI app (operator API /api/v1 and edge API /edge/v1), auth, SSE. Tasks: S1-A1, S3-A1, S5, S6. Every query takes a tenant argument; edge endpoints derive site/tenant from the mTLS cert.

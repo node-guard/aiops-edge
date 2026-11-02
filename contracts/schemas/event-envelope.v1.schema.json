@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiops.local/schemas/event-envelope.v1.schema.json",
+  "title": "Event envelope v1 (CloudEvents-compatible)",
+  "type": "object",
+  "required": ["specversion", "id", "source", "type", "subject", "time", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "specversion": {"const": "1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "source": {"type": "string", "pattern": "^urn:aiops:site:[^:]+:[a-z0-9-]+$"},
+    "type": {
+      "type": "string",
+      "enum": [
+        "com.aiops.node.anomaly.detected.v1",
+        "com.aiops.node.resource.exhaustion_predicted.v1",
+        "com.aiops.node.health.changed.v1",
+        "com.aiops.k8s.pod.state_changed.v1",
+        "com.aiops.k8s.deployment.health_degraded.v1",
+        "com.aiops.app.health_check.failed.v1",
+        "com.aiops.network.probe.degraded.v1",
+        "com.aiops.alert.firing.v1",
+        "com.aiops.site.connectivity.changed.v1",
+        "com.aiops.remediation.execution.completed.v1",
+        "com.aiops.remediation.verification.failed.v1"
+      ]
+    },
+    "subject": {"type": "string"},
+    "time": {"type": "string", "format": "date-time"},
+    "datacontenttype": {"const": "application/json"},
+    "dataschema": {"type": "string"},
+    "data": {
+      "type": "object",
+      "required": ["observed_at", "severity", "entity", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "observed_at": {"type": "string", "format": "date-time"},
+        "severity": {"enum": ["info", "warning", "error", "critical"]},
+        "entity": {
+          "type": "object",
+          "required": ["kind", "id"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"enum": ["site", "node", "namespace", "workload", "pod", "container", "service"]},
+            "id": {"type": "string"}
+          }
+        },
+        "payload": {"type": "object"}
+      }
+    }
+  }
+}

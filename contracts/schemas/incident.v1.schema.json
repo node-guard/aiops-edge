@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiops.local/schemas/incident.v1.schema.json",
+  "title": "Local incident (synchronised version) v1",
+  "type": "object",
+  "required": ["local_incident_id", "version", "fingerprint", "severity", "status", "opened_at", "updated_at", "entity_refs", "event_ids"],
+  "additionalProperties": false,
+  "properties": {
+    "local_incident_id": {"type": "string"},
+    "version": {"type": "integer", "minimum": 1},
+    "fingerprint": {"type": "string"},
+    "severity": {"enum": ["info", "warning", "error", "critical"]},
+    "status": {"enum": ["NEW", "TRIAGING", "INVESTIGATING", "AWAITING_APPROVAL", "REMEDIATING", "VERIFYING", "RESOLVED", "ESCALATED", "FALSE_POSITIVE", "FAILED"]},
+    "opened_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "resolved_at": {"type": ["string", "null"], "format": "date-time"},
+    "entity_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "id"],
+        "additionalProperties": false,
+        "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}
+      }
+    },
+    "event_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  }
+}
