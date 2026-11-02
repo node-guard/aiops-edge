@@ -1,0 +1,15 @@
+# Gitleaks configuration.
+#
+# The contract examples must carry schema-valid UUIDs under `idempotency_key`
+# (see contracts/schemas/command-envelope.v1.schema.json). The default
+# generic-api-key heuristic flags the key name, not a credential, so allowlist
+# only lines where an idempotency_key carries a UUID.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Schema-required idempotency_key UUIDs in contract examples are not secrets"
+regexTarget = "line"
+regexes = [
+  '''"idempotency_key"\s*:\s*"[0-9a-fA-F-]{36}"''',
+]
