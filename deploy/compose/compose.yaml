@@ -1,4 +1,12 @@
 # Central control plane (MVP). Edge sites are deployed with Helm (deploy/helm/edge-stack).
+#
+# Run it through the Makefile (`make up`), which passes `--env-file .env` so the
+# values below are interpolated: `docker compose` looks for a `.env` next to this
+# file by default, and ours lives at the repository root.
+#
+# Containers reach PostgreSQL at the `postgres` service name. The `DATABASE_URL`
+# in `.env` points at `localhost` because it is also used by tools run on the
+# host; `environment:` overrides it inside the containers.
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -13,25 +21,57 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: unless-stopped
     # not published to the host on purpose
+
   api:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.central
+      # Lab workaround: on this host the bridge network cannot query DNS (UDP/53
+      # is dropped for the docker subnet), which breaks `pip install` during the
+      # build. The build only needs outbound HTTPS; runtime stays on the compose
+      # network. Remove this once the host firewall/DNS path is fixed.
+      network: host
     command: ["uvicorn", "aiops.central.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://aiops:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/aiops
     env_file: ../../.env
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      # python:3.12-slim has no curl/wget; probe with the standard library.
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).read()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
   worker:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.central
+      network: host # see the api build comment
     command: ["python", "-m", "aiops.central.worker.main"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://aiops:${POSTGRES_PASSWORD:?set in .env}@postgres:5432/aiops
     env_file: ../../.env
     depends_on:
       postgres:
         condition: service_healthy
+    # No HTTP port, so there is no meaningful container healthcheck. The worker
+    # logs `worker_heartbeat` every WORKER_POLL_SECONDS; check the logs.
+    stop_grace_period: 10s
+    restart: unless-stopped
+
   proxy:
     image: caddy:2
     ports:
@@ -40,6 +80,9 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
