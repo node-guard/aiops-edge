@@ -1,4 +1,4 @@
-.PHONY: setup check lint types test test-sec schemas up down lab-up lab-down fmt
+.PHONY: setup check lint types test test-sec schemas up down lab-up lab-down fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
@@ -34,6 +34,18 @@ up:
 
 down:
 	$(COMPOSE) down
+
+# Migrations run inside the compose network: PostgreSQL is not published to the
+# host, and the container already has DATABASE_URL pointing at `postgres`.
+migrate:
+	$(COMPOSE) run --rm api alembic upgrade head
+
+# Autogenerate writes into the mounted host directory, so run as the host UID.
+migration:
+	@test -n "$(m)" || { echo 'usage: make migration m="describe the change"'; exit 1; }
+	$(COMPOSE) run --rm --user "$$(id -u):$$(id -g)" \
+		-v "$(CURDIR)/src/aiops/central/db/migrations:/app/src/aiops/central/db/migrations" \
+		api alembic revision --autogenerate -m "$(m)"
 
 lab-up:
 	bash deploy/lab/lab-up.sh

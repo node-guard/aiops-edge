@@ -23,6 +23,17 @@ make down
 `make up` passes `--env-file .env` explicitly: Compose looks for `.env` next to
 `compose.yaml` by default, and this repository keeps it at the root.
 
+## Schema
+
+```bash
+make migrate                  # alembic upgrade head, inside the compose network
+make migration m="add x"      # autogenerate a revision into src/aiops/central/db/migrations
+```
+
+PostgreSQL is not published to the host, so Alembic runs as a one-off container
+that already has `DATABASE_URL` pointing at `postgres`. `make migrate` is
+idempotent: running it twice is a no-op.
+
 ## Verify
 
 ```bash
