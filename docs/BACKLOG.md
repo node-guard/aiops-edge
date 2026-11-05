@@ -29,7 +29,7 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 | ID | Task | Tier | Owner | Acceptance | Status |
 |---|---|---|---|---|---|
 | S1-J1 | Create repo from this pack; CI green; pre-commit; CODEOWNERS handles set | M | J | `make check` green locally and in CI | todo |
-| S1-J2 | Review and freeze contracts v1 (event, incident, command, rca, run-meta) | M | J | `make schemas` green; examples valid; both approve | review |
+| S1-J2 | Review and freeze contracts v1 (event, incident, command, rca, run-meta) | M | J | `make schemas` green; examples valid; both approve | done |
 | S1-J3 | Confirm with supervisor: defense date, edge-device expectation (RPi/ARM), IP rules | M | J | Answers recorded in PRD §12 | todo |
 | S1-J4 | Prepare interview script; book 3 interviews | S | J | Script in `docs/discovery/`; 3 slots booked | todo |
 | S1-B1 | QEMU/libvirt scripts: server + worker VM, private net, K3s install, kubeconfig fetch | M | B | `make lab-up` yields 2 Ready nodes; API private | todo |

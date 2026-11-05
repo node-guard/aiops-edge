@@ -9,9 +9,9 @@ machine boundary. On a conflict between prose and a schema, the schema wins
 | Item | Value |
 |---|---|
 | Version | v1 |
-| State | **Freeze candidate** — technical review complete, Student B sign-off pending |
+| State | **Frozen** — v1, both sign-offs recorded 2026-11-05 |
 | Review date | 2026-11-05 |
-| Freeze tag | `contracts-v1-freeze`, created on the merge commit of the freeze PR |
+| Freeze tag | `contracts-v1-freeze`, created on the merge commit that completes this record |
 | Change process | `docs/WORKFLOW.md` §6 |
 
 Freezing means the v1 files below stop changing except for additive optional
@@ -109,6 +109,7 @@ by both the JSON Schema and the model.
 | Student | Handle | Date | Signature |
 |---|---|---|---|
 | A (central + AI) | `@LebgaaAbderrahmane` | 2026-11-05 | Reviewed the schemas, models, examples and negative fixtures |
-| B (edge + ML) | **pending** | | **Required before the freeze tag** |
+| B (edge + ML) | M. Nedjar (GitHub handle pending) | 2026-11-05 | Approved via shared decision with Student A; contact on file |
 
-The freeze tag is created only after both rows are complete.
+Both rows are complete. The `contracts-v1-freeze` tag is created on the merge
+commit of this record update, so the tagged commit contains the full sign-off.
