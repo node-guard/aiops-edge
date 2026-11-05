@@ -2,13 +2,25 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aiops.local/schemas/event-envelope.v1.schema.json",
   "title": "Event envelope v1 (CloudEvents-compatible)",
+  "description": "An event emitted by a site component. Identity (tenant/site) is derived from the site mTLS certificate, not from this payload. CloudEvents fields are used as-is; aiops-specific fields live under `data`. The `data.payload` object is intentionally type-specific and is validated by the producer/consumer for its event type.",
   "type": "object",
   "required": ["specversion", "id", "source", "type", "subject", "time", "data"],
   "additionalProperties": false,
   "properties": {
-    "specversion": {"const": "1.0"},
-    "id": {"type": "string", "minLength": 1},
-    "source": {"type": "string", "pattern": "^urn:aiops:site:[^:]+:[a-z0-9-]+$"},
+    "specversion": {
+      "const": "1.0",
+      "description": "CloudEvents spec version. Only 1.0 is accepted."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique event id within a site. Together with the authenticated site id it forms the idempotency key."
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^urn:aiops:site:[^:]+:[a-z0-9-]+$",
+      "description": "URN of the emitting site component, e.g. urn:aiops:site:<site-id>:ml-detector. The site id is checked against the mTLS certificate."
+    },
     "type": {
       "type": "string",
       "enum": [
@@ -23,29 +35,62 @@
         "com.aiops.site.connectivity.changed.v1",
         "com.aiops.remediation.execution.completed.v1",
         "com.aiops.remediation.verification.failed.v1"
-      ]
+      ],
+      "description": "Event type. The v1 suffix is part of the contract; a new shape requires a new type suffix."
     },
-    "subject": {"type": "string"},
-    "time": {"type": "string", "format": "date-time"},
-    "datacontenttype": {"const": "application/json"},
-    "dataschema": {"type": "string"},
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable subject, e.g. node/<uid> or deployment/<namespace>/<name>."
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time the event occurred, UTC RFC 3339. Central assigns received_at/processed_at separately; do not overload this field."
+    },
+    "datacontenttype": {
+      "const": "application/json",
+      "description": "Optional CloudEvents content type; when present it must be application/json."
+    },
+    "dataschema": {
+      "type": "string",
+      "description": "Optional URI of the type-specific payload schema."
+    },
     "data": {
       "type": "object",
       "required": ["observed_at", "severity", "entity", "payload"],
       "additionalProperties": false,
       "properties": {
-        "observed_at": {"type": "string", "format": "date-time"},
-        "severity": {"enum": ["info", "warning", "error", "critical"]},
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time the signal was observed by the site component, UTC RFC 3339."
+        },
+        "severity": {
+          "enum": ["info", "warning", "error", "critical"],
+          "description": "Operational severity of this event."
+        },
         "entity": {
           "type": "object",
           "required": ["kind", "id"],
           "additionalProperties": false,
+          "description": "The entity this event is about, at the lowest meaningful level of the tenant -> site -> cluster -> node -> namespace/workload/pod/container hierarchy.",
           "properties": {
-            "kind": {"enum": ["site", "node", "namespace", "workload", "pod", "container", "service"]},
-            "id": {"type": "string"}
+            "kind": {
+              "enum": ["site", "node", "namespace", "workload", "pod", "container", "service"],
+              "description": "Entity kind. Keep it consistent with the identity hierarchy in SPEC section 4."
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Internal UUID or Kubernetes UID. Kubernetes UIDs are stored alongside internal ids, never instead of them."
+            }
           }
         },
-        "payload": {"type": "object"}
+        "payload": {
+          "type": "object",
+          "description": "Type-specific event body. Open by design; each producer/consumer validates the fields it needs. Never place secrets or credentials here."
+        }
       }
     }
   }

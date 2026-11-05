@@ -1,0 +1,16 @@
+{
+  "command_id": "2b8e5d2f-7d4c-4b9a-9b66-0a1c7b2e3d44",
+  "command_type": "remediation.execute",
+  "site_id": "2f0a6a43-7a56-4b43-9a2d-6f1d3b0e1a11",
+  "issued_at": "2026-11-02T10:30:00Z",
+  "expires_at": "2026-11-02T10:35:00Z",
+  "idempotency_key": "8d4f6e3a-2c1b-4a7e-8f5d-3b2a1c0e9d55",
+  "payload": {
+    "action_id": "ACT-001",
+    "action_version": "1",
+    "target": {"namespace": "aiops-test", "resource_kind": "Deployment", "resource_uid": "3e6b3c1f-0a8e-4f0e-9c6d-5a1b2c3d4e55"},
+    "parameters": {},
+    "policy_version": "12",
+    "approval_id": null
+  }
+}

@@ -11,6 +11,6 @@
     "target": {"namespace": "aiops-test", "resource_kind": "Deployment", "resource_uid": "3e6b3c1f-0a8e-4f0e-9c6d-5a1b2c3d4e55"},
     "parameters": {"replicas": 3},
     "policy_version": "12",
-    "approval_id": null
+    "approval_id": "7d3c2b1a-0f9e-4d8c-9b7a-6f5e4d3c2b11"
   }
 }

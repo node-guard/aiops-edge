@@ -1,0 +1,12 @@
+{
+  "investigation_id": "c0ffee00-1111-4222-8333-444455556677",
+  "status": "inconclusive",
+  "summary": "No node or pod metrics were available for the incident window, so no root cause can be confirmed.",
+  "root_cause_candidates": [],
+  "confirmed_facts": [],
+  "hypotheses": ["The node may have been unreachable during the window."],
+  "alternative_hypotheses": [],
+  "missing_evidence": ["node metrics for the incident window", "pod restart counts"],
+  "proposed_action": null,
+  "limitations": ["Investigation stopped after the tool budget was exhausted."]
+}

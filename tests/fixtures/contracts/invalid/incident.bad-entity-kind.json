@@ -1,0 +1,12 @@
+{
+  "local_incident_id": "inc-000123",
+  "version": 3,
+  "fingerprint": "node.cpu_saturation:node/5b7c1d52",
+  "severity": "warning",
+  "status": "INVESTIGATING",
+  "opened_at": "2026-11-02T10:30:20Z",
+  "updated_at": "2026-11-02T10:31:05Z",
+  "resolved_at": null,
+  "entity_refs": [{"kind": "cluster", "id": "5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22"}],
+  "event_ids": ["8d0f6f1e-3c11-4c0e-9d5e-0b7d6a9d1f01"]
+}

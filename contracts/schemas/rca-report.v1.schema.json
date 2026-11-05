@@ -2,51 +2,108 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aiops.local/schemas/rca-report.v1.schema.json",
   "title": "Structured RCA report v1",
+  "description": "Structured output of one investigation. Facts must cite stored evidence; anything without evidence belongs in hypotheses. `inconclusive` is a valid, expected result when evidence is missing or the budget is exhausted. The report never contains hidden reasoning or credentials.",
   "type": "object",
   "required": ["investigation_id", "status", "summary", "root_cause_candidates", "confirmed_facts", "hypotheses", "alternative_hypotheses", "missing_evidence", "limitations"],
   "additionalProperties": false,
   "properties": {
-    "investigation_id": {"type": "string"},
-    "status": {"enum": ["confirmed", "probable", "inconclusive", "unknown"]},
-    "summary": {"type": "string"},
+    "investigation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Central investigation id this report belongs to."
+    },
+    "status": {
+      "enum": ["confirmed", "probable", "inconclusive", "unknown"],
+      "description": "Confidence class, not a calibrated probability. Use inconclusive when the evidence or budget is insufficient."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short operator-facing summary. Must not state an unsupported claim as fact."
+    },
     "root_cause_candidates": {
       "type": "array",
+      "description": "Ranked candidate root causes. Empty when status is inconclusive/unknown.",
       "items": {
         "type": "object",
         "required": ["entity_id", "fault_type", "rank", "evidence_ids"],
         "additionalProperties": false,
         "properties": {
-          "entity_id": {"type": "string"},
-          "fault_type": {"type": "string"},
-          "rank": {"type": "integer", "minimum": 1},
-          "evidence_ids": {"type": "array", "items": {"type": "string"}}
+          "entity_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity the candidate refers to."
+          },
+          "fault_type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Fault class, aligned with the fault catalogue where possible (e.g. cpu_saturation, memory_pressure)."
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1 = most likely. Ties are allowed only with an explicit reason in limitations."
+          },
+          "evidence_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1},
+            "description": "Evidence supporting this candidate. A candidate without evidence must be a hypothesis instead."
+          }
         }
       }
     },
     "confirmed_facts": {
       "type": "array",
+      "description": "Statements promoted to fact because they cite at least one stored evidence item.",
       "items": {
         "type": "object",
         "required": ["statement", "evidence_ids"],
         "additionalProperties": false,
         "properties": {
-          "statement": {"type": "string"},
-          "evidence_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "description": "One falsifiable claim."
+          },
+          "evidence_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1},
+            "description": "Stored evidence references; empty is invalid."
+          }
         }
       }
     },
-    "hypotheses": {"type": "array", "items": {"type": "string"}},
-    "alternative_hypotheses": {"type": "array", "items": {"type": "string"}},
-    "missing_evidence": {"type": "array", "items": {"type": "string"}},
+    "hypotheses": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Unconfirmed explanations, kept separate from facts."
+    },
+    "alternative_hypotheses": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Alternatives that were considered and not ruled out."
+    },
+    "missing_evidence": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "What would be needed to confirm or eliminate the candidates."
+    },
     "proposed_action": {
       "type": ["object", "null"],
       "required": ["action_id", "parameters"],
       "additionalProperties": false,
+      "description": "Optional proposal. Only a catalogue action id is allowed; the Remediation Manager re-validates target, parameters, level and approval.",
       "properties": {
         "action_id": {"enum": ["ACT-001", "ACT-002", "ACT-003"]},
         "parameters": {"type": "object"}
       }
     },
-    "limitations": {"type": "array", "items": {"type": "string"}}
+    "limitations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Known limits of this investigation (single node, missing metrics, time budget, ...)."
+    }
   }
 }

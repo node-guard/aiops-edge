@@ -1,0 +1,16 @@
+{
+  "investigation_id": "c0ffee00-1111-4222-8333-444455556666",
+  "status": "probable",
+  "summary": "CPU saturation caused the latency increase.",
+  "root_cause_candidates": [
+    {"entity_id": "5b7c1d52-3e0a-4a7e-8f55-1c8f0e5c9a22", "fault_type": "cpu_saturation", "rank": 1, "evidence_ids": []}
+  ],
+  "confirmed_facts": [
+    {"statement": "Node CPU p95 stayed above 95% for 8 minutes.", "evidence_ids": ["ev-001"]}
+  ],
+  "hypotheses": [],
+  "alternative_hypotheses": [],
+  "missing_evidence": [],
+  "proposed_action": null,
+  "limitations": []
+}
