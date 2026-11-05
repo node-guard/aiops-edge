@@ -153,7 +153,7 @@ Edge API `/edge/v1` (mTLS): `POST enrollment`, `POST heartbeat`, `GET config`, `
 
 Limits (DEFAULT, load-test): heartbeat ~32 KB, event batch ~200 records/~1 MB, command ~64 KB, SSE metadata only (client refetches via REST). SSE: persistent notification records + cursor; on expired replay send reset; no tokens in URLs.
 
-Schemas: `contracts/schemas/*.json`. Any schema change follows `WORKFLOW.md` §6.
+Schemas: `contracts/schemas/*.json`. The freeze record, versioning rules and pre-freeze changes are in `contracts/README.md`. Any schema change follows `WORKFLOW.md` §6.
 
 ## 12. Security and risks
 

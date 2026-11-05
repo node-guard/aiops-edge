@@ -2,21 +2,51 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aiops.local/schemas/command-envelope.v1.schema.json",
   "title": "Command envelope v1",
+  "description": "A command queued by central for one site. The site id must match the mTLS certificate; it is never trusted from the request body. Remediation commands carry only a catalogue action id and typed parameters. Diagnostic commands name a read-only tool. No shell, kubectl passthrough or arbitrary code field exists.",
   "type": "object",
   "required": ["command_id", "command_type", "site_id", "issued_at", "expires_at", "idempotency_key", "payload"],
   "additionalProperties": false,
   "properties": {
-    "command_id": {"type": "string", "format": "uuid"},
-    "command_type": {"enum": ["remediation.execute", "diagnostic.run"]},
-    "site_id": {"type": "string", "format": "uuid"},
-    "issued_at": {"type": "string", "format": "date-time"},
-    "expires_at": {"type": "string", "format": "date-time"},
-    "idempotency_key": {"type": "string", "format": "uuid"},
-    "payload": {"type": "object"}
+    "command_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Command id. The site stores an execution record keyed by this id; a duplicate must return the recorded result and must not re-execute."
+    },
+    "command_type": {
+      "enum": ["remediation.execute", "diagnostic.run"],
+      "description": "Command family. The payload shape is selected by this value."
+    },
+    "site_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Target site. Must equal the site id in the mTLS certificate; a mismatch is rejected and audited."
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Issue time, UTC RFC 3339."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiry time, UTC RFC 3339. Must be after issued_at; the default policy expiry is 300 seconds. Expired commands are rejected with 410 and audited."
+    },
+    "idempotency_key": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Idempotency key for the dispatch attempt. The local execution record is keyed by command_id."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Command body, selected by command_type. See the conditional rules below."
+    }
   },
   "allOf": [
     {
-      "if": {"properties": {"command_type": {"const": "remediation.execute"}}},
+      "if": {
+        "properties": {"command_type": {"const": "remediation.execute"}},
+        "required": ["command_type"]
+      },
       "then": {
         "properties": {
           "payload": {
@@ -24,28 +54,50 @@
             "required": ["action_id", "action_version", "target", "parameters", "policy_version", "approval_id"],
             "additionalProperties": false,
             "properties": {
-              "action_id": {"enum": ["ACT-001", "ACT-002", "ACT-003"]},
-              "action_version": {"type": "string"},
+              "action_id": {
+                "enum": ["ACT-001", "ACT-002", "ACT-003"],
+                "description": "Catalogue action id. Anything outside contracts/actions/actions.yaml is L3 and must never be dispatched."
+              },
+              "action_version": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Catalogue action version, so a changed action definition cannot silently alter a queued command."
+              },
               "target": {
                 "type": "object",
                 "required": ["namespace", "resource_kind", "resource_uid"],
                 "additionalProperties": false,
+                "description": "Exact target. The resource UID is re-checked at the site; a name alone is not enough.",
                 "properties": {
-                  "namespace": {"type": "string"},
+                  "namespace": {"type": "string", "minLength": 1},
                   "resource_kind": {"const": "Deployment"},
-                  "resource_uid": {"type": "string"}
+                  "resource_uid": {"type": "string", "minLength": 1}
                 }
               },
-              "parameters": {"type": "object"},
-              "policy_version": {"type": "string"},
-              "approval_id": {"type": ["string", "null"]}
+              "parameters": {
+                "type": "object",
+                "description": "Typed parameters for the action. ACT-001/ACT-003 take no parameters; ACT-002 requires replicas (see the action-specific rules below)."
+              },
+              "policy_version": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Policy snapshot version used for the decision. The site re-checks it against its cached snapshot."
+              },
+              "approval_id": {
+                "type": ["string", "null"],
+                "format": "uuid",
+                "description": "Approval reference for L2 actions. Null is allowed for L1 actions; ACT-003 is always L2 and therefore requires a non-null approval."
+              }
             }
           }
         }
       }
     },
     {
-      "if": {"properties": {"command_type": {"const": "diagnostic.run"}}},
+      "if": {
+        "properties": {"command_type": {"const": "diagnostic.run"}},
+        "required": ["command_type"]
+      },
       "then": {
         "properties": {
           "payload": {
@@ -53,9 +105,116 @@
             "required": ["tool", "arguments"],
             "additionalProperties": false,
             "properties": {
-              "tool": {"enum": ["get_node_metrics", "get_node_status", "get_container_metrics", "get_pod_status", "get_previous_container_logs", "search_application_logs", "get_service_health", "get_network_metrics", "get_recent_deployments"]},
-              "arguments": {"type": "object"},
-              "max_bytes": {"type": "integer", "minimum": 1, "maximum": 65536}
+              "tool": {
+                "enum": [
+                  "get_node_metrics",
+                  "get_node_status",
+                  "get_container_metrics",
+                  "get_pod_status",
+                  "get_previous_container_logs",
+                  "search_application_logs",
+                  "get_service_health",
+                  "get_network_metrics",
+                  "get_dependency_graph",
+                  "get_recent_deployments",
+                  "search_runbooks",
+                  "get_related_incidents"
+                ],
+                "description": "Read-only diagnostic tool. search_runbooks is P1; the rest are available from S7 onward."
+              },
+              "arguments": {
+                "type": "object",
+                "description": "Typed tool arguments. Validated outside the LLM before dispatch; invalid arguments are rejected before reaching the site."
+              },
+              "max_bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65536,
+                "description": "Optional response cap. Defaults to the gateway/tool cap when omitted; never larger than 64 KiB."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {"const": "remediation.execute"},
+          "payload": {
+            "properties": {"action_id": {"const": "ACT-002"}},
+            "required": ["action_id"]
+          }
+        },
+        "required": ["command_type", "payload"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "parameters": {
+                "type": "object",
+                "required": ["replicas"],
+                "additionalProperties": false,
+                "properties": {
+                  "replicas": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10,
+                    "description": "Desired replica count. The site policy additionally enforces min_replicas and max_replicas; scale-in and changes larger than +1 are L2."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {"const": "remediation.execute"},
+          "payload": {
+            "properties": {"action_id": {"enum": ["ACT-001", "ACT-003"]}},
+            "required": ["action_id"]
+          }
+        },
+        "required": ["command_type", "payload"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "parameters": {
+                "type": "object",
+                "maxProperties": 0,
+                "description": "ACT-001 (restart) and ACT-003 (rollback) take no parameters."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {"const": "remediation.execute"},
+          "payload": {
+            "properties": {"action_id": {"const": "ACT-003"}},
+            "required": ["action_id"]
+          }
+        },
+        "required": ["command_type", "payload"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "approval_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "ACT-003 is always L2; a null or missing approval is invalid."
+              }
             }
           }
         }

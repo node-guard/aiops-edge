@@ -2,28 +2,75 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aiops.local/schemas/incident.v1.schema.json",
   "title": "Local incident (synchronised version) v1",
+  "description": "One version of a site-local incident. Identity is not carried in the payload: site_id and tenant_id are derived from the authenticated site certificate. Central links this to a central incident using (site_id, local_incident_id); versions must increase monotonically.",
   "type": "object",
   "required": ["local_incident_id", "version", "fingerprint", "severity", "status", "opened_at", "updated_at", "entity_refs", "event_ids"],
   "additionalProperties": false,
   "properties": {
-    "local_incident_id": {"type": "string"},
-    "version": {"type": "integer", "minimum": 1},
-    "fingerprint": {"type": "string"},
-    "severity": {"enum": ["info", "warning", "error", "critical"]},
-    "status": {"enum": ["NEW", "TRIAGING", "INVESTIGATING", "AWAITING_APPROVAL", "REMEDIATING", "VERIFYING", "RESOLVED", "ESCALATED", "FALSE_POSITIVE", "FAILED"]},
-    "opened_at": {"type": "string", "format": "date-time"},
-    "updated_at": {"type": "string", "format": "date-time"},
-    "resolved_at": {"type": ["string", "null"], "format": "date-time"},
+    "local_incident_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Site-local incident id, stable across versions."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic version. Duplicate version = ack; lower version = stale, ignore; same version with different content = conflict, reject and audit."
+    },
+    "fingerprint": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Deterministic correlation fingerprint, e.g. node.cpu_saturation:node/<uid>."
+    },
+    "severity": {
+      "enum": ["info", "warning", "error", "critical"],
+      "description": "Highest severity of the correlated events."
+    },
+    "status": {
+      "enum": ["NEW", "TRIAGING", "INVESTIGATING", "AWAITING_APPROVAL", "REMEDIATING", "VERIFYING", "RESOLVED", "ESCALATED", "FALSE_POSITIVE", "FAILED"],
+      "description": "Incident state. Transitions are governed by the state machine in SPEC section 6; every transition is appended to history."
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time the incident was opened, UTC RFC 3339."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time this version was produced, UTC RFC 3339. Must be >= opened_at."
+    },
+    "resolved_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Time the incident reached RESOLVED, or null while open."
+    },
     "entity_refs": {
       "type": "array",
       "minItems": 1,
+      "description": "Entities involved in the incident, ordered from root to symptom when known.",
       "items": {
         "type": "object",
         "required": ["kind", "id"],
         "additionalProperties": false,
-        "properties": {"kind": {"type": "string"}, "id": {"type": "string"}}
+        "properties": {
+          "kind": {
+            "enum": ["site", "node", "namespace", "workload", "pod", "container", "service"],
+            "description": "Entity kind, consistent with the event envelope."
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Internal UUID or Kubernetes UID."
+          }
+        }
       }
     },
-    "event_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+    "event_ids": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Event ids correlated into this incident. Used for evidence and replay/audit.",
+      "items": {"type": "string", "minLength": 1}
+    }
   }
 }
