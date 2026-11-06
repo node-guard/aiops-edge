@@ -1,11 +1,15 @@
-# Replace the placeholders with real GitHub handles (without angle brackets).
-/src/aiops/central/   @student-a
-/web/                 @student-a
-/src/aiops/edge/      @student-b
-/deploy/              @student-b
-/experiments/         @student-b
-/contracts/           @student-a @student-b
-/src/aiops/contracts/ @student-a @student-b
-/src/aiops/common/    @student-a @student-b
-/tests/security/      @student-a @student-b
-/docs/                @student-a @student-b
+# Owners for the two-person PFE. Student A: central + AI. Student B: edge + ML.
+# Joint paths require both. Unknown users are ignored by GitHub; keep this file
+# in sync with docs/WORKFLOW.md §1 and §2.
+
+/src/aiops/central/   @LebgaaAbderrahmane
+/web/                 @LebgaaAbderrahmane
+/src/aiops/edge/      @Moumennjr
+/deploy/              @Moumennjr
+/experiments/         @Moumennjr
+/contracts/           @LebgaaAbderrahmane @Moumennjr
+/src/aiops/contracts/ @LebgaaAbderrahmane @Moumennjr
+/src/aiops/common/    @LebgaaAbderrahmane @Moumennjr
+/tests/security/      @LebgaaAbderrahmane @Moumennjr
+/docs/                @LebgaaAbderrahmane @Moumennjr
+/.github/             @LebgaaAbderrahmane @Moumennjr
