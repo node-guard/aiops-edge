@@ -20,8 +20,8 @@ this repository.
 
 ## Status
 
-- Script prepared; first dry run and the three bookings are tracked in
-  `interview-script.md` and remain a human step.
+- Instrument ready. The dry run and the first three bookings are **deferred to
+  S13-J3** by team decision; they remain a human step.
 - After 5 interviews, apply the kill/pivot rule: fewer than 2 participants
   operating multi-site Linux infrastructure means revisiting the segment and
   recording the decision in an ADR.
