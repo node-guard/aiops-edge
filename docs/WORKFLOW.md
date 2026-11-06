@@ -16,13 +16,18 @@ The human who starts an agent session is accountable for what it produces and re
 
 ## 2. Branching, commits, PRs
 
-- `main` is the demo/release branch and is always green; `dev` is the integration branch. Both are protected: a PR is required, the `python` and `gitleaks` checks must pass, and only squash merges are allowed.
+- `main` is the demo/release branch and is always green; `dev` is the integration branch. Both are protected by the repository ruleset `protected-branches` (id `26379490`):
+  - pull request required, **0 required approvals** while there is one writing collaborator;
+  - `python` and `gitleaks` required checks (`integration_id: 15368`), branch must be up to date;
+  - linear history, no deletion, no force-push, **squash merge only**.
 - Short-lived branches come from `dev` and target `dev`: `feat/S3-B2-outbox`, `fix/S5-A2-revoked-cert`, `docs/S1-J1-readme`. At each sprint demo/checkpoint, open a `dev` → `main` PR so `main` matches what was demonstrated. Never push directly to `main` or `dev`.
 - One task = one branch = one PR, ideally < 400 changed lines. Split larger work.
 - Conventional Commits with task ID: `feat(edge): transactional outbox [S3-B2]`. Types: feat, fix, test, docs, refactor, chore, ci.
 - PR needs: linked task ID, acceptance criteria checklist, "How I verified" (commands + results), "Not verified / known gaps", contract/ADR impact, security impact (yes/no).
 - Review: the *other* student reviews anything under Joint ownership or `tests/security`; the owner reviews the rest; the other student skims every PR weekly. Squash merge.
-- Never force-push `main`. Never commit `.env`, keys, kubeconfigs, datasets > 50 MB (use `experiments/runs` manifests + external storage).
+- **Solo-maintainer exception.** Until Student B accepts the collaborator invite there is one writer, so approvals stay at 0. CODEOWNERS still requests the right reviewer in the UI but does not block the merge. As soon as a second writer exists, raise the approval count to 1; do not merge a Joint or `tests/security` change without the other student's review.
+- **Changing protection is admin-only.** Use the GitHub UI (Settings → Rules → Rulesets → `protected-branches`) or `gh api repos/node-guard/aiops-edge/rulesets/26379490`; never disable the ruleset to land a change. After any change, update this section and run a throwaway PR to confirm checks, squash-only and force-push rejection.
+- Deadlines: `main` never receives a direct push; no force-push anywhere; never commit `.env`, keys, kubeconfigs, datasets > 50 MB (use `experiments/runs` manifests + external storage).
 
 ## 3. The agent session protocol
 
