@@ -1,0 +1,16 @@
+<network>
+  <name>${LAB_NETWORK_NAME}</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='${LAB_BRIDGE}' stp='on' delay='0'/>
+  <ip address='${LAB_GATEWAY}' prefix='${LAB_NETWORK_PREFIX}'>
+    <dhcp>
+      <range start='${LAB_DHCP_START}' end='${LAB_DHCP_END}'/>
+      <host mac='${LAB_SERVER_MAC}' ip='${LAB_SERVER_IP}'/>
+      <host mac='${LAB_WORKER_MAC}' ip='${LAB_WORKER_IP}'/>
+    </dhcp>
+  </ip>
+</network>

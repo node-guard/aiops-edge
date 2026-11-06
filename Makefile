@@ -1,4 +1,4 @@
-.PHONY: setup check lint types test test-sec schemas up down lab-up lab-down fmt migrate migration
+.PHONY: setup check lint types test test-sec schemas up down lab-up lab-check lab-down fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
@@ -50,5 +50,8 @@ migration:
 lab-up:
 	bash deploy/lab/lab-up.sh
 
+lab-check:
+	bash deploy/lab/lab-up.sh --check
+
 lab-down:
-	bash deploy/lab/lab-down.sh
+	bash deploy/lab/lab-down.sh $(ARGS)

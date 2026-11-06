@@ -1,0 +1,54 @@
+#cloud-config
+hostname: ${LAB_VM_HOSTNAME}
+manage_etc_hosts: true
+preserve_hostname: false
+ssh_pwauth: false
+disable_root: true
+
+# Do not let cloud-init generate a netplan config. This image only runs
+# `netplan generate` during the local stage and never applies it, so networkd
+# would stay without an address. We write a networkd unit below instead.
+network:
+  config: disabled
+
+users:
+  - name: ${LAB_SSH_USER}
+    gecos: AIOps lab
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    groups: [sudo]
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${LAB_SSH_PUBLIC_KEY_CONTENT}
+
+write_files:
+  - path: /etc/systemd/network/10-lab.network
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Match]
+      MACAddress=${LAB_VM_MAC}
+
+      [Network]
+      Address=${LAB_VM_IP}/${LAB_NETWORK_PREFIX}
+      Gateway=${LAB_GATEWAY}
+      DNS=${LAB_DNS_SERVER}
+      IPv6AcceptRA=no
+
+package_update: true
+package_upgrade: false
+packages:
+  - ca-certificates
+  - curl
+  - jq
+  - qemu-guest-agent
+
+runcmd:
+  - [systemctl, enable, --now, systemd-networkd]
+  - [systemctl, restart, systemd-networkd]
+  - [sh, -c, 'for _ in $(seq 1 30); do ip -4 addr show scope global | grep -q inet && break; sleep 1; done']
+  # systemd-resolved is not enabled in the cloud image; write the resolver.
+  - [sh, -c, "rm -f /etc/resolv.conf && echo 'nameserver ${LAB_DNS_SERVER}' > /etc/resolv.conf"]
+  - [systemctl, enable, --now, qemu-guest-agent]
+
+final_message: "aiops lab node ${LAB_VM_HOSTNAME} ready after $UPTIME seconds"
