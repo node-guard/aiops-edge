@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-demo
+  labels:
+    app.kubernetes.io/name: shop-demo
+    app.kubernetes.io/component: app
+    app.kubernetes.io/part-of: shop-demo
+    aiops.io/fault-target: "true"
+  annotations:
+    aiops.io/fault-role: application
+    aiops.io/image-digest: "sha256:d221e511e98eb283a14906fe5e2fb36544031b9efb3a5d8ac7398e63c450a222"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: shop-demo
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: shop-demo
+        app.kubernetes.io/component: app
+        app.kubernetes.io/part-of: shop-demo
+        aiops.io/fault-target: "true"
+      annotations:
+        aiops.io/fault-role: application
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: shop-demo
+                    app.kubernetes.io/component: app
+      terminationGracePeriodSeconds: 15
+      containers:
+        - name: app
+          image: shop-demo:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: SERVICE_NAME
+            - name: SERVICE_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: SERVICE_VERSION
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: LOG_LEVEL
+            - name: ENABLE_FAULT_ENDPOINTS
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: ENABLE_FAULT_ENDPOINTS
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: DB_USER
+            - name: DB_CONNECT_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: shop-demo-config
+                  key: DB_CONNECT_TIMEOUT
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shop-demo-db
+                  key: DB_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "2"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

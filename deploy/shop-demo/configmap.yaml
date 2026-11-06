@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-demo-config
+  labels:
+    app.kubernetes.io/name: shop-demo
+    app.kubernetes.io/part-of: shop-demo
+data:
+  SERVICE_NAME: shop-demo
+  SERVICE_VERSION: "0.1.0"
+  LOG_LEVEL: INFO
+  # Fault endpoints (/work/*) are part of the lab harness. Set to "false" if the
+  # demo is ever exposed outside the disposable lab.
+  ENABLE_FAULT_ENDPOINTS: "true"
+  DB_HOST: shop-demo-db
+  DB_PORT: "5432"
+  DB_NAME: shop
+  DB_USER: shop
+  DB_CONNECT_TIMEOUT: "2"

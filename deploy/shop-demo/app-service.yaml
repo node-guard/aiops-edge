@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-demo
+  labels:
+    app.kubernetes.io/name: shop-demo
+    app.kubernetes.io/component: app
+    app.kubernetes.io/part-of: shop-demo
+spec:
+  # Reachable from the lab host at http://192.168.100.10:30080.
+  # No public ingress and no port forward on the host's external interface.
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: shop-demo
+    app.kubernetes.io/component: app
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080
