@@ -1,12 +1,12 @@
-.PHONY: setup check lint types test test-sec schemas up down lab-up lab-check lab-down fmt migrate migration
+.PHONY: setup check lint types test test-sec schemas up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
 	uv run pre-commit install || true
 
 lint:
-	uv run ruff check src tests experiments
-	uv run ruff format --check src tests experiments
+	uv run ruff check src tests experiments deploy
+	uv run ruff format --check src tests experiments deploy
 
 types:
 	uv run mypy src/aiops/contracts src/aiops/common
@@ -23,7 +23,7 @@ test-sec:
 check: lint types schemas test test-sec
 
 fmt:
-	uv run ruff format src tests experiments
+	uv run ruff format src tests experiments deploy
 
 # `docker compose` looks for `.env` next to compose.yaml; ours is at the repo
 # root, so pass it explicitly for interpolation.
@@ -55,3 +55,15 @@ lab-check:
 
 lab-down:
 	bash deploy/lab/lab-down.sh $(ARGS)
+
+# Requires KUBECONFIG pointing at the lab; the guard refuses any other cluster.
+shop-demo-build:
+	bash deploy/shop-demo/scripts/build-and-load.sh
+
+shop-demo-deploy:
+	bash deploy/lab/lib/lab-guard.sh
+	kubectl apply -k deploy/shop-demo
+
+shop-demo-delete:
+	bash deploy/lab/lib/lab-guard.sh
+	kubectl delete -k deploy/shop-demo

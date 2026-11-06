@@ -8,8 +8,11 @@
 useDefault = true
 
 [allowlist]
-description = "Schema-required idempotency_key UUIDs in contract examples are not secrets"
+description = "Schema-required idempotency_key UUIDs and the public shop-demo lab password are not secrets"
 regexTarget = "line"
 regexes = [
   '''"idempotency_key"\s*:\s*"[0-9a-fA-F-]{36}"''',
+  # deploy/shop-demo/secret.yaml: base64("shop-demo-lab-only"). Example only;
+  # the plaintext is in the file's comment and in the README.
+  '''c2hvcC1kZW1vLWxhYi1vbmx5''',
 ]

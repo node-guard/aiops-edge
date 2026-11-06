@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shop-demo-db-data
+  labels:
+    app.kubernetes.io/name: shop-demo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: shop-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
