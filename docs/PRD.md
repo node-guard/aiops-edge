@@ -5,7 +5,7 @@
 | Status | Baseline v1.0 (trimmed scope) |
 | Date | 2026-11-02 |
 | Team | Two-person ING4 Software Engineering PFE (Student A: central + AI, Student B: edge + ML) |
-| Horizon | ~5-6 months, 12 two-week sprints (see `BACKLOG.md`) |
+| Horizon | ~5-6 months, 12 two-week sprints plus S13 final review (see `BACKLOG.md`) |
 | Source | Derived from the Master Project Specification v1.0 after the scope review; the trimmed tiers here override the original P0 list |
 
 ## 1. Vision
@@ -118,7 +118,7 @@ IDs carry over from the master spec; tier replaces the old priority.
 
 ## 10. Release plan
 
-Milestones P0–P10 map to sprints S1–S12 (`BACKLOG.md`). Demo-able increment every sprint; integration demo every second sprint; first full vertical slice (event → central dashboard) by end of S3; complete lifecycle by S9; Scenario B by S10.
+Milestones P0–P10 map to sprints S1–S12 (`BACKLOG.md`), followed by S13 for final review and deferred external decisions. Demo-able increment every sprint; integration demo every second sprint; first full vertical slice (event → central dashboard) by end of S3; complete lifecycle by S9; Scenario B by S10.
 
 ## 11. Risks
 
@@ -126,13 +126,17 @@ See `SPEC.md` §12 and the master risk register. Top three: scope creep (mitigat
 
 ## 12. Open questions
 
-| Question | Owner | Needed by |
-|---|---|---|
-| PFE defense date and sprint length confirmation | Both | S1 |
-| Supervisor: does "Edge" imply real devices (Raspberry Pi/ARM)? | Both | S1 |
-| University/supervisor IP and commercialization terms | Both | S4 |
-| LLM provider, budget and key handling (cloud API; local fallback stays stretch) | Student A | S7 |
-| Product positioning: MSPs vs "teams without ops staff" (align deck and spec) | Both | S6 |
+Supervisor guidance recorded 2026-11-06. The exact defense date and the final
+evaluation/publication details are reworked in Sprint 13 before the defense.
+
+| Question | Answer / decision | Date | Source | Revisit |
+|---|---|---|---|---|
+| PFE defense date and sprint length | Defense in **June 2026** (exact day TBD); **30–60 minutes**; recorded demo is fine, live also acceptable; **50/50** demo/thesis weighting. Current 2-week sprint cadence stays. | 2026-11-06 | Supervisor, relayed by the team | S13-J1: exact date and final format |
+| Does "Edge" imply real devices (Raspberry Pi/ARM)? | **Not required for now**: the QEMU x86-64 lab is sufficient. If ARM becomes a requirement, update the scope and run it. | 2026-11-06 | Supervisor, relayed by the team | S13-J4 |
+| University/supervisor IP and commercialization terms | Repository may **stay public for now**; the thesis may quote logs and metrics; **no anonymization requirement**; **no license or CLA required** at this stage. | 2026-11-06 | Supervisor, relayed by the team | S13-J2: final review |
+| Evaluation expectations (repetitions, statistics, page limit) | Not specified yet; the project continues with the current targets and revisits this before the defense. | 2026-11-06 | Supervisor, relayed by the team | S13-J1 |
+| LLM provider, budget and key handling (cloud API; local fallback stays stretch) | Still open. | — | Student A | S7 |
+| Product positioning: MSPs vs "teams without ops staff" (align deck and spec) | Still open; discovery interviews will inform it. | — | Both | S6-J1, S13-J3 |
 
 ## 13. Traceability to the official subject
 

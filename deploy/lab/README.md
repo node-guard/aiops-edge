@@ -146,7 +146,7 @@ cloud-init user-data/meta-data/seed ISOs, the SSH key and the kubeconfig.
 ## Not implemented yet
 
 - The optional plain Linux VM (no Kubernetes) from the original target table.
-- ARM/Raspberry Pi images; the lab is x86_64 only.
+- ARM/Raspberry Pi images are **not required for now** (supervisor guidance, 2026-11-06); the lab is x86_64 only. If ARM becomes a requirement, the decision and optional run are tracked in S13-J4.
 - Automatic host reboot recovery: `virsh` autostart is set on the network and
   domains, but a reboot has not been exercised in this task.
 - `shellcheck` is not installed on this host, so the scripts are checked with

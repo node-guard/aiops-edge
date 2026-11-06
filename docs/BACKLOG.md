@@ -1,6 +1,6 @@
-# Backlog: 12 two-week sprints
+# Backlog: 13 two-week sprints (S1–S12 + S13 final review)
 
-Single status board. Task ID format `S<sprint>-<owner><n>` where owner is **A** (central + AI), **B** (edge + ML) or **J** (joint). Status: `todo` · `doing` · `review` · `done` · `cut`. Tier from PRD §5: **M** must, **S** simplified, **P1** should, **D** design-only (a short doc, no code).
+Single status board. Task ID format `S<sprint>-<owner><n>` where owner is **A** (central + AI), **B** (edge + ML) or **J** (joint). Status: `todo` · `doing` · `review` · `done` · `deferred` · `cut`. Tier from PRD §5: **M** must, **S** simplified, **P1** should, **D** design-only (a short doc, no code). `deferred` means consciously moved to S13 or a later sprint, with the reason recorded in the task or PRD §12.
 
 Rules: tasks ≤ 3 working days; split otherwise. Acceptance is demonstrable. The last sprint week of S11 is buffer. If a sprint slips by a third, cut by tier (see `WORKFLOW.md` §12).
 
@@ -20,6 +20,7 @@ Rules: tasks ≤ 3 working days; split otherwise. Acceptance is demonstrable. Th
 | S10 | Offline autonomy | Scenario B end-to-end |
 | S11 | Integration, hardening, freeze | Scenarios A/B/C automated; criteria frozen |
 | S12 | Evaluation + thesis | Final runs, analysis, release candidate |
+| S13 | Final review + deferred decisions | Exact defense logistics, IP/license, deferred interviews, ARM decision |
 
 ---
 
@@ -28,10 +29,10 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 
 | ID | Task | Tier | Owner | Acceptance | Status |
 |---|---|---|---|---|---|
-| S1-J1 | Create repo from this pack; CI green; pre-commit; CODEOWNERS handles set | M | J | `make check` green locally and in CI | todo |
+| S1-J1 | Create repo from this pack; CI green; pre-commit; CODEOWNERS handles set | M | J | `make check` green locally and in CI | done |
 | S1-J2 | Review and freeze contracts v1 (event, incident, command, rca, run-meta) | M | J | `make schemas` green; examples valid; both approve | done |
-| S1-J3 | Confirm with supervisor: defense date, edge-device expectation (RPi/ARM), IP rules | M | J | Answers recorded in PRD §12 | todo |
-| S1-J4 | Prepare interview script; book 3 interviews | S | J | Script in `docs/discovery/`; 3 slots booked | doing |
+| S1-J3 | Confirm with supervisor: defense date, edge-device expectation (RPi/ARM), IP rules | M | J | Answers recorded in PRD §12 | done |
+| S1-J4 | Prepare interview script; book 3 interviews | S | J | Script in `docs/discovery/`; 3 slots booked | deferred (S13-J3) |
 | S1-B1 | QEMU/libvirt scripts: server + worker VM, private net, K3s install, kubeconfig fetch | M | B | `make lab-up` yields 2 Ready nodes; API private | done |
 | S1-B2 | Sample app `shop-demo` (HTTP + health + DB dependency) deployed in `aiops-test` | M | B | App reachable from host; health endpoint works | done |
 | S1-A1 | Central Compose: proxy, API skeleton (`/health/live|ready|dependencies`), PostgreSQL | M | A | `make up` → all healthy | done |
@@ -145,7 +146,7 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 | S11-J2 | Security review; log/LLM redaction tests; threat-model update | M | J | `make test-sec` green; doc updated | todo |
 | S11-J3 | Design-only docs: backup/restore, SBOM/signing, canary rollout (1-2 pages each) | D | J | Docs in `docs/design/` | todo |
 | S11-J4 | **Freeze evaluation criteria and targets**; record commit hash | M | J | Tag `eval-freeze` | todo |
-| S11-J5 | Interviews complete (8-10); design-partner ask | S | J | Summary doc | todo |
+| S11-J5 | Interviews complete (8-10); design-partner ask | S | J | Summary doc; deferred interviews tracked in S13-J3 | todo |
 | S11-J6 | Buffer (last 3 days): fix, polish, cut | M | J | n/a | todo |
 
 ## S12: Evaluation and thesis
@@ -155,7 +156,17 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 | S12-J2 | Analysis notebooks and statistics (paired, effect sizes) | M | J | Figures regenerate from scripts | todo |
 | S12-J3 | Dataset manifest + reproducibility package | M | J | Fresh clone reproduces key figures | todo |
 | S12-J4 | Thesis writing, demo video, release candidate tag | M | J | `v1.0-rc` | todo |
-| S12-J5 | Optional: Raspberry Pi/ARM worker run | P1 | B | Reported if done | todo |
+| S12-J5 | Optional: Raspberry Pi/ARM worker run | P1 | B | Moved to S13-J4; ARM not required as of 2026-11-06 | deferred |
+
+## S13: Final review and deferred decisions
+Goal: close the external decisions that were consciously deferred from S1, before the June defense. This sprint does not add product scope; it removes ambiguity.
+
+| ID | Task | Tier | Owner | Acceptance | Status |
+|---|---|---|---|---|---|
+| S13-J1 | Reconfirm exact defense date, format, demo mode and evaluation expectations | M | J | Exact date, duration, demo mode, 50/50 weighting, repetitions/statistics and page limit recorded in PRD §12 | todo |
+| S13-J2 | Final IP, publication and license review | M | J | Public-repo/license/anonymization decision final; README and PRD §12 updated | todo |
+| S13-J3 | Complete the deferred discovery interviews and finalize positioning | S | J | At least 3 interviews synthesized and anonymized; S6-J1 decision reviewed | todo |
+| S13-J4 | ARM/Raspberry Pi decision and optional run | P1 | B | Decision recorded in PRD §12; run reported only if required | todo |
 
 ## Parking lot (not scheduled)
 Local LLM experiment; OIDC; multi-site correlation; second lab site; LOF baseline; workload-specific models; central TSDB.

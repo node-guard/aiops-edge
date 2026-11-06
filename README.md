@@ -39,5 +39,10 @@ tests/          unit, integration, security, e2e
 ## Status
 Baseline docs v1.0 (2026-11-02). Sprint status lives in `docs/BACKLOG.md`.
 
+Supervisor guidance recorded 2026-11-06: the repository may stay public for now
+and no license/CLA is required at this stage; the thesis may quote logs and
+metrics. The exact June 2026 defense date, final publication/license terms and
+evaluation expectations are reworked in Sprint 13 (`S13-J1`, `S13-J2`).
+
 ## Team
 Student A (central + AI), Student B (edge + ML), supervisor Prof. Badiâa Dellal-Hedjazi.
