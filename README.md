@@ -46,8 +46,8 @@ metrics. The exact June 2026 defense date, final publication/license terms and
 evaluation expectations are reworked in Sprint 13 (`S13-J1`, `S13-J2`).
 
 Sprint 2 is in progress: the edge observability stack (`S2-B1`) is installed and
-verified in the lab; the healthy-data soak (`S2-B4`) starts next and must run
-for at least five continuous days.
+verified in the lab; the healthy-data soak (`S2-B4`) started on 2026-11-07 and
+must run for at least five continuous days.
 
 ## Team
 Student A (central + AI), Student B (edge + ML), supervisor Prof. Badiâa Dellal-Hedjazi.
