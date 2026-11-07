@@ -24,7 +24,7 @@ scrape config or PVC is a soak interruption and must be logged here with the
 reason and duration. The Prometheus pod carries a config checksum annotation,
 so any edit to the chart values that affects it will roll the pod.
 
-### Baseline checkpoint (2026-11-07T07:50Z, ~78 min after start)
+### Baseline checkpoint (2026-11-07T06:50Z, ~18 min after start)
 
 | Check | Result |
 |---|---|
