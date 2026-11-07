@@ -41,7 +41,7 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 ## S2: Observability and data collection
 | ID | Task | Tier | Owner | Acceptance | Status |
 |---|---|---|---|---|---|
-| S2-B1 | Helm `edge-stack` v0: Prometheus, node-exporter, kube-state-metrics, Alertmanager; resource limits | M | B | Node/pod metrics visible; values schema validates | todo |
+| S2-B1 | Helm `edge-stack` v0: Prometheus, node-exporter, kube-state-metrics, Alertmanager; resource limits | M | B | Node/pod metrics visible; values schema validates | done |
 | S2-B2 | Experiment harness v0: `run_fault.py`, `meta.json`, lab-context guard; faults F01, F02 | M | B | Run produces meta + labelled window | todo |
 | S2-B3 | Workload generator (Locust) for realistic healthy variation | M | B | Variable load profile documented | todo |
 | S2-B4 | Healthy-data soak started (≥ 5 days continuous) | M | B | Prometheus retention proof; notes in `experiments/NOTES.md` | todo |

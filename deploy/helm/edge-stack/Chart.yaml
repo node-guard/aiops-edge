@@ -1,0 +1,19 @@
+apiVersion: v2
+name: edge-stack
+description: Observability stack for one AIops edge site (Prometheus, Alertmanager, node-exporter, kube-state-metrics).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.28.0-0"
+keywords:
+  - aiops
+  - edge
+  - prometheus
+  - observability
+home: https://github.com/node-guard/aiops-edge
+sources:
+  - https://github.com/node-guard/aiops-edge
+maintainers:
+  - name: Student B
+annotations:
+  aiops.dev/task: S2-B1

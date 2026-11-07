@@ -1,4 +1,4 @@
-.PHONY: setup check lint types test test-sec schemas up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete fmt migrate migration
+.PHONY: setup check lint types test test-sec schemas helm-check up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
@@ -20,7 +20,13 @@ test:
 test-sec:
 	uv run pytest tests/security -q
 
-check: lint types schemas test test-sec
+check: lint types schemas helm-check test test-sec
+
+# The chart is the edge deployment contract: render it on every check.
+# Requires `helm` (https://helm.sh/docs/intro/install/); CI installs it too.
+helm-check:
+	helm lint --strict deploy/helm/edge-stack
+	helm template edge-stack deploy/helm/edge-stack --namespace aiops-system > /dev/null
 
 fmt:
 	uv run ruff format src tests experiments deploy

@@ -1,0 +1,74 @@
+# Least-privilege RBAC. No wildcards, no secrets, no exec, no patch.
+#
+# The telemetry role exists so Prometheus can discover scrape targets through
+# the Kubernetes API. It cannot read objects it does not scrape.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-telemetry
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-telemetry
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "edge-stack.fullname" . }}-telemetry
+subjects:
+  - kind: ServiceAccount
+    name: aiops-telemetry
+    namespace: {{ .Release.Namespace }}
+---
+# Object-level read access for kube-state-metrics. The wider observer grant in
+# SPEC §12 (events, bounded pods/log) is added with the detector in S4, not
+# given to a metrics exporter that does not need it.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-observer
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - pods
+      - services
+      - endpoints
+      - persistentvolumeclaims
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+      - daemonsets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-observer
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "edge-stack.fullname" . }}-observer
+subjects:
+  - kind: ServiceAccount
+    name: aiops-observer
+    namespace: {{ .Release.Namespace }}

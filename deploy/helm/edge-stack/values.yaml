@@ -1,0 +1,128 @@
+# Default values for edge-stack (S2-B1).
+#
+# One site = one release. The chart is deliberately self-contained: no
+# kube-prometheus-stack, no Prometheus Operator, no CRDs, so it fits a small
+# edge node and can be rendered offline.
+#
+# Image references are pinned by tag AND digest. Digests were read from the
+# registry on 2026-11-07:
+#   quay.io/prometheus/prometheus:v3.5.0
+#   quay.io/prometheus/alertmanager:v0.28.1
+#   quay.io/prometheus/node-exporter:v1.9.1
+#   registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0
+# Bump tag and digest together; the security test rejects a missing digest.
+
+# Site identity. Exported as Prometheus external labels so that a central
+# collector can tell sites apart without trusting the payload.
+site:
+  name: lab
+  environment: lab
+
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullPolicy: IfNotPresent
+
+prometheus:
+  image:
+    repository: quay.io/prometheus/prometheus
+    tag: v3.5.0
+    digest: sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
+  # 168h = 7 days, the retention promised in SPEC §13.
+  retention: 168h
+  scrapeInterval: 30s
+  evaluationInterval: 30s
+  service:
+    port: 9090
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    size: 5Gi
+    # Empty string means "use the cluster default StorageClass" (local-path on
+    # K3s). Set it explicitly on a site with more than one class.
+    storageClass: ""
+  nodeSelector: {}
+  tolerations: []
+
+alertmanager:
+  enabled: true
+  image:
+    repository: quay.io/prometheus/alertmanager
+    tag: v0.28.1
+    digest: sha256:27c475db5fb156cab31d5c18a4251ac7ed567746a2483ff264516437a39b15ba
+  # Notification state retention. Alerts and receivers are added with the
+  # policy engine; v0 routes everything to a null receiver.
+  retention: 120h
+  service:
+    port: 9093
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: false
+    size: 1Gi
+    storageClass: ""
+  nodeSelector: {}
+  tolerations: []
+
+nodeExporter:
+  image:
+    repository: quay.io/prometheus/node-exporter
+    tag: v1.9.1
+    digest: sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
+  service:
+    port: 9100
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+  # Must run on every node, including tainted control-plane nodes.
+  tolerations:
+    - operator: Exists
+  nodeSelector: {}
+
+kubeStateMetrics:
+  image:
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: v2.14.0
+    digest: sha256:37d841299325c23b56e5951176ce8ef317d537447c0f1b2d2437dddbb1f51165
+  service:
+    port: 8080
+  telemetryPort: 8081
+  # Collect only what the detector and the dashboard need. Secrets and
+  # configmaps are never collected.
+  collectedResources:
+    - nodes
+    - namespaces
+    - pods
+    - services
+    - endpoints
+    - deployments
+    - replicasets
+    - statefulsets
+    - daemonsets
+    - jobs
+    - cronjobs
+    - persistentvolumeclaims
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 192Mi
+  nodeSelector: {}
+  tolerations: []

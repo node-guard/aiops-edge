@@ -29,5 +29,7 @@ jobs:
       # TODO(S11): pin third-party actions to full commit SHAs
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
+      # `make check` renders and schema-validates the edge-stack Helm chart.
+      - uses: azure/setup-helm@v4
       - run: uv sync --all-extras --dev
       - run: make check
