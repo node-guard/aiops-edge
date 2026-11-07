@@ -1,4 +1,4 @@
-.PHONY: setup check lint types test test-sec schemas helm-check up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete fmt migrate migration
+.PHONY: setup check lint types test test-sec schemas helm-check up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete load fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
@@ -73,3 +73,8 @@ shop-demo-deploy:
 shop-demo-delete:
 	bash deploy/lab/lib/lab-guard.sh
 	kubectl delete -k deploy/shop-demo
+
+# Healthy HTTP load for the soak (S2-B3). Never calls the fault hooks.
+load:
+	LOAD_PROFILE=$(or $(PROFILE),standard) HOST=$(or $(HOST),http://192.168.100.10:30080) \
+		bash experiments/load/run.sh
