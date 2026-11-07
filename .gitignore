@@ -16,6 +16,7 @@ dist/
 *.joblib
 *.parquet
 experiments/runs/*/raw/
+experiments/runs/load-*/
 deploy/lab/images/
 deploy/lab/.state/
 .DS_Store

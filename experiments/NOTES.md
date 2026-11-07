@@ -37,6 +37,15 @@ so any edit to the chart values that affects it will roll the pod.
 | Namespaces in `kube_pod_info` | `aiops-system`, `aiops-test`, `default`, `kube-node-lease`, `kube-public`, `kube-system` |
 | Known gap | no per-container CPU/memory (cAdvisor); node + pod object metrics only |
 
+### Load generator (S2-B3), 2026-11-07
+
+- `make load PROFILE=smoke` at 06:56Z: 90 requests, **0 failures**, median 3 ms,
+  max 19 ms, 1.51 req/s; no pod restart.
+- `make load PROFILE=standard` started 06:57:22Z (21-minute cycle: 5 → 10 → 25
+  → 8 users); output in a git-ignored `experiments/runs/load-*` folder.
+- The generator runs on the host and only performs GETs on `/`,
+  `/health/live` and `/health/ready`; it never calls `/work/*`.
+
 ### Daily check (once per day)
 
 ```bash
