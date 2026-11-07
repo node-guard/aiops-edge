@@ -1,0 +1,112 @@
+{{- if .Values.alertmanager.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-alertmanager
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: alertmanager
+spec:
+  serviceName: {{ include "edge-stack.fullname" . }}-alertmanager
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "edge-stack.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: alertmanager
+  template:
+    metadata:
+      labels:
+        {{- include "edge-stack.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: alertmanager
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/alertmanager-configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: aiops-observer
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.alertmanager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.alertmanager.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: alertmanager
+          image: {{ include "edge-stack.image" .Values.alertmanager.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          args:
+            - --config.file=/etc/alertmanager/alertmanager.yml
+            - --storage.path=/alertmanager
+            - --web.listen-address=:{{ .Values.alertmanager.service.port }}
+            - --cluster.listen-address=
+            - --data.retention={{ .Values.alertmanager.retention }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.alertmanager.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.alertmanager.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alertmanager
+              readOnly: true
+            - name: data
+              mountPath: /alertmanager
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "edge-stack.fullname" . }}-alertmanager-config
+        - name: tmp
+          emptyDir: {}
+        {{- if not .Values.alertmanager.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+  {{- if .Values.alertmanager.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "edge-stack.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: alertmanager
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.alertmanager.persistence.storageClass }}
+        storageClassName: {{ .Values.alertmanager.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.alertmanager.persistence.size }}
+  {{- end }}
+{{- end }}

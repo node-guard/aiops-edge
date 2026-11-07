@@ -1,0 +1,20 @@
+edge-stack is installed in namespace {{ .Release.Namespace }}.
+
+Scrape targets:
+  - Prometheus:         {{ include "edge-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}
+  - node-exporter:      {{ include "edge-stack.fullname" . }}-node-exporter:{{ .Values.nodeExporter.service.port }} (one pod per node)
+  {{- if .Values.alertmanager.enabled }}
+  - Alertmanager:       {{ include "edge-stack.fullname" . }}-alertmanager:{{ .Values.alertmanager.service.port }}
+  {{- end }}
+  - kube-state-metrics: {{ include "edge-stack.fullname" . }}-kube-state-metrics:{{ .Values.kubeStateMetrics.service.port }}
+
+Open Prometheus locally:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "edge-stack.fullname" . }}-prometheus {{ .Values.prometheus.service.port }}:{{ .Values.prometheus.service.port }}
+
+Then query:
+  node_cpu_seconds_total
+  kube_pod_info
+
+Retention: {{ .Values.prometheus.retention }} (TSDB), persistence {{ if .Values.prometheus.persistence.enabled }}enabled ({{ .Values.prometheus.persistence.size }}){{ else }}disabled (emptyDir){{ end }}.
+Known gap: container CPU/memory (cAdvisor) is not scraped in v0; pod-level
+metrics come from kube-state-metrics and node-level metrics from node-exporter.

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-kube-state-metrics
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kube-state-metrics
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      {{- include "edge-stack.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        {{- include "edge-stack.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: kube-state-metrics
+    spec:
+      serviceAccountName: aiops-observer
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.kubeStateMetrics.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kubeStateMetrics.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kube-state-metrics
+          image: {{ include "edge-stack.image" .Values.kubeStateMetrics.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          args:
+            - --resources={{ join "," .Values.kubeStateMetrics.collectedResources }}
+            - --port={{ .Values.kubeStateMetrics.service.port }}
+            - --telemetry-port={{ .Values.kubeStateMetrics.telemetryPort }}
+          ports:
+            - name: http-metrics
+              containerPort: {{ .Values.kubeStateMetrics.service.port }}
+              protocol: TCP
+            - name: telemetry
+              containerPort: {{ .Values.kubeStateMetrics.telemetryPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http-metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: telemetry
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.kubeStateMetrics.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

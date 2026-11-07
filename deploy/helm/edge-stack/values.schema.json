@@ -1,0 +1,268 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "edge-stack values",
+  "description": "Values accepted by the AIops edge observability chart. Unknown keys are rejected so that typos fail at install time instead of silently doing nothing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["site", "prometheus", "alertmanager", "nodeExporter", "kubeStateMetrics"],
+  "properties": {
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "environment"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 63,
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "description": "Site identifier used as a Prometheus external label."
+        },
+        "environment": {
+          "type": "string",
+          "enum": ["lab", "staging", "production"]
+        }
+      }
+    },
+    "nameOverride": {
+      "type": "string",
+      "maxLength": 63
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "maxLength": 63
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"]
+    },
+    "prometheus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image",
+        "retention",
+        "scrapeInterval",
+        "evaluationInterval",
+        "service",
+        "resources",
+        "persistence",
+        "nodeSelector",
+        "tolerations"
+      ],
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "retention": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*(ms|s|m|h|d|w|y)$",
+          "description": "TSDB retention, e.g. 168h for 7 days."
+        },
+        "scrapeInterval": {
+          "type": "string",
+          "pattern": "^[0-9]+(ms|s|m)$"
+        },
+        "evaluationInterval": {
+          "type": "string",
+          "pattern": "^[0-9]+(ms|s|m)$"
+        },
+        "service": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["port"],
+          "properties": {
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+          }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "persistence": { "$ref": "#/definitions/persistence" },
+        "nodeSelector": { "$ref": "#/definitions/nodeSelector" },
+        "tolerations": { "$ref": "#/definitions/tolerations" }
+      }
+    },
+    "alertmanager": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "image",
+        "retention",
+        "service",
+        "resources",
+        "persistence",
+        "nodeSelector",
+        "tolerations"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "image": { "$ref": "#/definitions/image" },
+        "retention": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*(ms|s|m|h|d|w|y)$"
+        },
+        "service": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["port"],
+          "properties": {
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+          }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "persistence": { "$ref": "#/definitions/persistence" },
+        "nodeSelector": { "$ref": "#/definitions/nodeSelector" },
+        "tolerations": { "$ref": "#/definitions/tolerations" }
+      }
+    },
+    "nodeExporter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "service", "resources", "tolerations", "nodeSelector"],
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "service": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["port"],
+          "properties": {
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            }
+          }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "tolerations": { "$ref": "#/definitions/tolerations" },
+        "nodeSelector": { "$ref": "#/definitions/nodeSelector" }
+      }
+    },
+    "kubeStateMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image",
+        "service",
+        "telemetryPort",
+        "collectedResources",
+        "resources",
+        "nodeSelector",
+        "tolerations"
+      ],
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "service": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["port"],
+          "properties": {
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+          }
+        },
+        "telemetryPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "collectedResources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "nodes",
+              "namespaces",
+              "pods",
+              "services",
+              "endpoints",
+              "deployments",
+              "replicasets",
+              "statefulsets",
+              "daemonsets",
+              "jobs",
+              "cronjobs",
+              "persistentvolumeclaims"
+            ]
+          }
+        },
+        "resources": { "$ref": "#/definitions/resources" },
+        "nodeSelector": { "$ref": "#/definitions/nodeSelector" },
+        "tolerations": { "$ref": "#/definitions/tolerations" }
+      }
+    }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "tag", "digest"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._/-]*$"
+        },
+        "tag": {
+          "type": "string",
+          "pattern": "^v?[0-9]+\\.[0-9]+\\.[0-9]+([-.][A-Za-z0-9.]+)?$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": { "$ref": "#/definitions/resourceList" },
+        "limits": { "$ref": "#/definitions/resourceList" }
+      }
+    },
+    "resourceList": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu", "memory"],
+      "properties": {
+        "cpu": {
+          "type": "string",
+          "pattern": "^([0-9]+(\\.[0-9]+)?|[0-9]+m)$"
+        },
+        "memory": {
+          "type": "string",
+          "pattern": "^[0-9]+(Mi|Gi)$"
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "size", "storageClass"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "size": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*(Mi|Gi)$"
+        },
+        "storageClass": { "type": "string" }
+      }
+    },
+    "nodeSelector": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "tolerations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": { "type": "string" },
+          "operator": { "type": "string", "enum": ["Exists", "Equal"] },
+          "value": { "type": "string" },
+          "effect": {
+            "type": "string",
+            "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"]
+          },
+          "tolerationSeconds": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

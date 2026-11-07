@@ -1,0 +1,4 @@
+# Build artifacts and local state.
+.DS_Store
+*.tgz
+values.local.yaml

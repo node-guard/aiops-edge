@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edge-stack.fullname" . }}-node-exporter
+  labels:
+    {{- include "edge-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: node-exporter
+spec:
+  type: ClusterIP
+  # With hostNetwork the endpoint is <nodeIP>:9100, so no selector-driven
+  # pod IP routing is needed beyond the DaemonSet selector.
+  ports:
+    - name: metrics
+      port: {{ .Values.nodeExporter.service.port }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "edge-stack.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: node-exporter
