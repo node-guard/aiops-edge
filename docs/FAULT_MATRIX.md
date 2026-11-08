@@ -6,8 +6,8 @@ Core = used for H1/H3 acceptance. Extended = added so rules-only baselines do no
 
 | ID | Fault | Injection | Expected signals | Correct handling | Tier |
 |---|---|---|---|---|---|
-| F01 | CPU saturation | `stress-ng --cpu` in test workload | node CPU, latency up | ACT-002 scale-out (+1, L1) | Core |
-| F02 | Memory pressure | bounded `stress-ng --vm` | memory growth, OOM risk | ACT-001 restart (L1) | Core |
+| F01 | CPU saturation | `stress-ng --cpu` in test workload (v0: `shop-demo /work/cpu`) | node CPU, latency up | ACT-002 scale-out (+1, L1) | Core |
+| F02 | Memory pressure | bounded `stress-ng --vm` (v0: `shop-demo /work/memory`) | memory growth, OOM risk | ACT-001 restart (L1) | Core |
 | F03 | Disk I/O degradation | write-heavy workload / fio | I/O util, latency | No action; RCA + escalate | Core |
 | F04 | Network degradation | `tc netem` latency/loss | RTT, timeouts | No action; RCA + escalate | Core |
 | F05 | Central disconnection | block site→central (and intermittent netem) | connector failures, outbox | Autonomy test (Scenario B) | Core |

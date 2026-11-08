@@ -2,6 +2,52 @@
 
 Dated entries: what changed, why, observations, anomalies. Keep newest first. Record maintenance windows that affect the healthy-data soak.
 
+## 2026-11-08 — Lab VM off: soak interrupted
+
+The lab VM (`ubuntu26.04`) was found `shut off` at **2026-11-08T19:58Z**; the
+API server `192.168.100.10:6443` times out and `kubectl` cannot reach the
+cluster.
+
+| Item | Value |
+|---|---|
+| Last confirmed lab activity | 2026-11-07T07:18:22Z (end of the `standard` load cycle) |
+| Found down | 2026-11-08T19:58Z |
+| Measured gap | ≥ 36 h (exact shutdown time unknown; the host was off, so no logs were collected) |
+| Affected | Prometheus scrape continuity, the 5-day soak clock, F02 lab verification |
+
+The TSDB and PVC survive a VM stop, but the Prometheus container start time
+resets when the lab is booted again. **The 5-continuous-day clock therefore
+restarts from the next Prometheus start**, and the retention proof date moves
+accordingly. The 2026-11-07 data stays queryable until it ages out (7-day
+retention). The `standard` load cycle ended cleanly before the outage, so its
+numbers below remain valid.
+
+No daily check was possible on 2026-11-08 beyond "cluster unreachable"; that is
+the recorded observation.
+
+### Standard load cycle result (2026-11-07T06:57:22Z → 07:18:22Z)
+
+| Endpoint | Requests | Failures | Median | p95 | Max |
+|---|---|---|---|---|---|
+| `GET /` | 3,974 | 0 | 3 ms | 4 ms | 207 ms |
+| `GET /health/live` | 1,857 | 0 | 3 ms | 5 ms | 249 ms |
+| `GET /health/ready` | 1,279 | 0 | 11 ms | 18 ms | 400 ms |
+| **Aggregated** | **7,110** | **0** | **3 ms** | **12 ms** | **400 ms** |
+
+Average 5.64 req/s over the full 21-minute cycle (burst stage peaked at 25
+users). No failure, and pods still reported `restarts=0` when the F01 run was
+checked at 07:08Z. Raw CSV is in a git-ignored `experiments/runs/load-*` folder.
+
+### Fault harness F01 (2026-11-07T07:07:58Z)
+
+`run_id=20261107T070758Z-F01-96b8c7`, `seconds=30`, `workers=2`, HTTP 200,
+valid, duration 30.068 s. Worker node CPU (1-minute average) rose from 2.9–3.1%
+to 15.3% during the run and returned to ~3% afterwards; the server node stayed
+flat. This is a real but modest signal: two busy loops on a 2-vCPU node that
+already runs other pods.
+
+**F02 was not run: the lab went down before it could be verified.**
+
 ## 2026-11-07 — Healthy-data soak started (S2-B4)
 
 **Start (UTC): 2026-11-07T06:31:53Z.** This is the Prometheus container start
@@ -16,7 +62,7 @@ before it, so the series after this timestamp are clean and continuous.
 | Prometheus | scrape `30s`, retention `168h`, 5 GiB local-path PVC (`pvc-222bdaa3-…` created 06:31:48Z) |
 | Labels | `site=lab`, `environment=lab` |
 | Workload | `shop-demo` (app + PostgreSQL) in `aiops-test`, no synthetic load yet |
-| Earliest completion | **2026-11-12T06:31:53Z** (5 continuous days) |
+| Earliest completion | **2026-11-12T06:31:53Z** (5 continuous days) — invalidated by the 2026-11-08 outage above |
 
 **Rule:** do not restart, upgrade or reconfigure Prometheus for convenience.
 Adding workloads or namespaces is fine; changing the Prometheus deployment,
@@ -80,7 +126,7 @@ curl -s localhost:9090/api/v1/status/flags | jq -r '.data["storage.tsdb.retentio
 
 | Time (UTC) | What | Reason | Duration |
 |---|---|---|---|
-| — | none | — | — |
+| 2026-11-08T19:58Z (found) | Lab VM off, Prometheus not running | Host shut down after the 2026-11-07 session; soak clock restarts at next start | ≥ 36 h (start time unknown) |
 
 ## 2026-11-02
 

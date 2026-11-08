@@ -42,9 +42,9 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 | ID | Task | Tier | Owner | Acceptance | Status |
 |---|---|---|---|---|---|
 | S2-B1 | Helm `edge-stack` v0: Prometheus, node-exporter, kube-state-metrics, Alertmanager; resource limits | M | B | Node/pod metrics visible; values schema validates | done |
-| S2-B2 | Experiment harness v0: `run_fault.py`, `meta.json`, lab-context guard; faults F01, F02 | M | B | Run produces meta + labelled window | todo |
+| S2-B2 | Experiment harness v0: `run_fault.py`, `meta.json`, lab-context guard; faults F01, F02 | M | B | Run produces meta + labelled window | doing (F01 verified; F02 awaits lab) |
 | S2-B3 | Workload generator (Locust) for realistic healthy variation | M | B | Variable load profile documented | done |
-| S2-B4 | Healthy-data soak started (≥ 5 days continuous) | M | B | Prometheus retention proof; notes in `experiments/NOTES.md` | doing (started 2026-11-07) |
+| S2-B4 | Healthy-data soak started (≥ 5 days continuous) | M | B | Prometheus retention proof; notes in `experiments/NOTES.md` | doing (interrupted 2026-11-08, clock restarts) |
 | S2-B5 | Prometheus → Parquet export for feature windows (script) | M | B | Parquet with units, no zero-filled gaps | todo |
 | S2-A1 | DB schema v1: events, incidents, incident_links, state history, audit | M | A | Migration + repository tests | todo |
 | S2-A2 | Tenant-aware repository layer (tenant arg required) + lint test | M | A | Test fails if a query omits tenant | todo |
