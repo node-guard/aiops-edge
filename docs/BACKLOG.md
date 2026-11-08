@@ -46,7 +46,7 @@ Goal: both students can run central and the lab; contracts v1 frozen.
 | S2-B3 | Workload generator (Locust) for realistic healthy variation | M | B | Variable load profile documented | done |
 | S2-B4 | Healthy-data soak started (≥ 5 days continuous) | M | B | Prometheus retention proof; notes in `experiments/NOTES.md` | doing (interrupted 2026-11-08, clock restarts) |
 | S2-B5 | Prometheus → Parquet export for feature windows (script) | M | B | Parquet with units, no zero-filled gaps | todo |
-| S2-A1 | DB schema v1: events, incidents, incident_links, state history, audit | M | A | Migration + repository tests | todo |
+| S2-A1 | DB schema v1: events, incidents, incident_links, state history, audit | M | A | Migration + repository tests | done (0002 + DB constraint tests; repositories in S2-A2) |
 | S2-A2 | Tenant-aware repository layer (tenant arg required) + lint test | M | A | Test fails if a query omits tenant | todo |
 | S2-J1 | Conduct interviews 1-3 | S | J | Notes logged, anonymized | todo |
 
