@@ -2,6 +2,48 @@
 
 Dated entries: what changed, why, observations, anomalies. Keep newest first. Record maintenance windows that affect the healthy-data soak.
 
+## 2026-11-09 — Lab back up, soak restarted, F02 verified
+
+`make lab-up` at 2026-11-09T07:14Z redefined and booted both VMs (they were
+undefined after the host shutdown; disks and state were intact). K3s reported
+2/2 Ready nodes and every workload restarted cleanly.
+
+### Soak restart
+
+**New Prometheus container start: 2026-11-09T07:16:42Z.** `restarts=1` on the
+container (the restart caused by the VM boot, not a crash). The TSDB is the same
+PVC, but the container uptime counters and the soak clock restarted.
+
+| Item | Value |
+|---|---|
+| Soak start | **2026-11-09T07:16:42Z** |
+| Earliest completion | **2026-11-14T07:16:42Z** (5 continuous days) |
+| Targets | 4/4 `up` (Prometheus, node-exporter ×2, kube-state-metrics) |
+| Pods | 5/5 monitoring ready, **0 crash restarts after boot** |
+| PVC | `Bound`, 5 GiB, same `pvc-e700e3e4-…` |
+| Retention | `1w` (168h) |
+| Old data | 2026-11-07 series remain queryable until they age out |
+
+### F02 memory pressure verified
+
+`run_id=20261109T071821Z-F02-18bd51`, 60 s, 128 MiB, HTTP 200, **valid**,
+duration 60.386 s. The request was served by `shop-demo-d74cbcf99-zc9ls` on
+`aiops-edge-worker` (confirmed by the `workload_finished` log line).
+
+| Signal (worker, 30 s scrapes) | Before (07:17:30Z) | During (07:18:00–30Z) | After (07:19:00Z) |
+|---|---|---|---|
+| `node_memory_MemAvailable_bytes` | 1,506 MiB | 1,380 → 1,360 MiB | 1,484 MiB |
+
+The 128 MiB allocation is visible as a ~146 MiB drop in available memory and is
+released when the request returns (a ~22 MiB residual is ordinary allocator/page
+churn, not the fault). No pod restarted, no OOM kill, no readiness failure.
+
+### Standard load cycle
+
+`make load PROFILE=standard` started **2026-11-09T07:19:03Z** (21-minute cycle)
+so the restarted soak is not a flat idle baseline. Result to be appended below
+when the cycle finishes.
+
 ## 2026-11-08 — Lab VM off: soak interrupted
 
 The lab VM (`ubuntu26.04`) was found `shut off` at **2026-11-08T19:58Z**; the
@@ -12,7 +54,7 @@ cluster.
 |---|---|
 | Last confirmed lab activity | 2026-11-07T07:18:22Z (end of the `standard` load cycle) |
 | Found down | 2026-11-08T19:58Z |
-| Measured gap | ≥ 36 h (exact shutdown time unknown; the host was off, so no logs were collected) |
+| Measured gap | ≈ 48 h: last data 2026-11-07T07:18:22Z, new Prometheus start 2026-11-09T07:16:42Z (host shutdown time unknown) |
 | Affected | Prometheus scrape continuity, the 5-day soak clock, F02 lab verification |
 
 The TSDB and PVC survive a VM stop, but the Prometheus container start time
@@ -126,7 +168,7 @@ curl -s localhost:9090/api/v1/status/flags | jq -r '.data["storage.tsdb.retentio
 
 | Time (UTC) | What | Reason | Duration |
 |---|---|---|---|
-| 2026-11-08T19:58Z (found) | Lab VM off, Prometheus not running | Host shut down after the 2026-11-07 session; soak clock restarts at next start | ≥ 36 h (start time unknown) |
+| 2026-11-08T19:58Z (found) | Lab VM off, Prometheus not running | Host shut down after the 2026-11-07 session; soak clock restarts at next start | ≈ 48 h (2026-11-07T07:18Z → 2026-11-09T07:17Z) |
 
 ## 2026-11-02
 

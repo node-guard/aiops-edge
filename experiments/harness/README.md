@@ -82,7 +82,7 @@ format, index append and kubectl timeout handling. No cluster is required.
 | Run | Verified in the lab |
 |---|---|
 | F01 CPU, 30 s, 2 workers | yes — HTTP 200, 30.07 s, worker CPU 2.9% → 15.3% |
-| F02 memory, 128 MiB, 30 s | **not yet** — lab VM was off; unit tests and ceiling guard only |
+| F02 memory, 128 MiB, 60 s | yes — HTTP 200, 60.39 s, worker available memory 1,506 → 1,360 MiB, recovered to 1,484 MiB; no restart |
 
 ## Known gaps
 
