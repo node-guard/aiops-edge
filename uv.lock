@@ -205,7 +205,9 @@ edge = [
     { name = "scikit-learn" },
 ]
 experiments = [
+    { name = "httpx" },
     { name = "locust" },
+    { name = "pyarrow" },
 ]
 
 [package.dev-dependencies]
@@ -225,6 +227,7 @@ requires-dist = [
     { name = "argon2-cffi", marker = "extra == 'central'", specifier = ">=23.1" },
     { name = "fastapi", marker = "extra == 'central'", specifier = ">=0.115" },
     { name = "httpx", marker = "extra == 'edge'", specifier = ">=0.27" },
+    { name = "httpx", marker = "extra == 'experiments'", specifier = ">=0.27" },
     { name = "joblib", marker = "extra == 'edge'", specifier = ">=1.4" },
     { name = "jsonschema", specifier = ">=4.22" },
     { name = "kubernetes", marker = "extra == 'edge'", specifier = ">=30.1" },
@@ -233,6 +236,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'edge'", specifier = ">=2.2" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'central'", specifier = ">=3.2" },
     { name = "pyarrow", marker = "extra == 'edge'", specifier = ">=16" },
+    { name = "pyarrow", marker = "extra == 'experiments'", specifier = ">=16" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "scikit-learn", marker = "extra == 'edge'", specifier = ">=1.5" },

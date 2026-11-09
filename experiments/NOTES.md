@@ -65,6 +65,33 @@ git-ignored `experiments/runs/load-20261109T071903Z/`.
 | Retention | `1w` (168h) |
 | Pods | 5/5 monitoring + 3/3 `shop-demo` ready; restart count 1 = the VM boot only |
 
+### First Parquet export (S2-B5)
+
+`make export START=2026-11-09T07:30:00Z END=2026-11-09T07:55:00Z STEP=30`
+against the forwarded Prometheus service.
+
+| Item | Value |
+|---|---|
+| Run folder | `experiments/runs/export-20261109T080825Z-f065dd/` (git-ignored) |
+| Rows | 2,958 |
+| Metrics / queries | 16 / 16, none empty |
+| Coverage | 1.0 for every query (51 steps per series) |
+| Series | 2 nodes, 11 pods, 6 deployments, 4 scrape targets, 4 disks |
+| File size | 10.0 KiB (zstd) |
+| Non-finite samples | 0 |
+| Schema | `prometheus-export.v1`, timestamp µs UTC, units metadata |
+
+Read-back checks: no nulls, no duplicate `(series_id, timestamp)`, `site=lab`
+on every row, values within expected ranges (CPU busy 0.024–0.042, memory
+available 1.52–2.12 GB, restarts constant at 1). The window intentionally
+covers the tail of the 07:19–07:40 load cycle.
+
+The first attempt had `node_disk_write_bytes_per_second` return zero series:
+the metric is `node_disk_written_bytes_total`, not `node_disk_write_bytes_total`.
+The exporter now fails closed when a query returns no series (unless
+`allow_empty: true`), so a wrong selector cannot silently become a missing
+feature. Fixed and re-exported; all queries have coverage 1.0.
+
 ## 2026-11-08 — Lab VM off: soak interrupted
 
 The lab VM (`ubuntu26.04`) was found `shut off` at **2026-11-08T19:58Z**; the

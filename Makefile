@@ -1,4 +1,4 @@
-.PHONY: setup check lint types test test-sec schemas helm-check up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete load fmt migrate migration
+.PHONY: setup check lint types test test-sec schemas helm-check up down lab-up lab-check lab-down shop-demo-build shop-demo-deploy shop-demo-delete load export fmt migrate migration
 
 setup:
 	uv sync --all-extras --dev
@@ -78,3 +78,16 @@ shop-demo-delete:
 load:
 	LOAD_PROFILE=$(or $(PROFILE),standard) HOST=$(or $(HOST),http://192.168.100.10:30080) \
 		bash experiments/load/run.sh
+
+# Raw Prometheus samples -> Parquet (S2-B5). Forward the service first:
+#   kubectl -n aiops-system port-forward svc/edge-stack-prometheus 9090:9090
+export:
+	@test -n "$(START)" && test -n "$(END)" || { \
+		echo 'usage: make export START=<rfc3339> END=<rfc3339> [STEP=30] [SITE=lab]'; exit 1; }
+	uv run python experiments/export/prometheus_to_parquet.py \
+		--start "$(START)" --end "$(END)" \
+		$(if $(STEP),--step $(STEP),) \
+		$(if $(SITE),--site $(SITE),) \
+		$(if $(CONFIG),--config $(CONFIG),) \
+		$(if $(URL),--url $(URL),) \
+		$(if $(OUTPUT_DIR),--output-dir $(OUTPUT_DIR),)

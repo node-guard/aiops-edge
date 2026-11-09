@@ -8,7 +8,10 @@ runs/
 ├── 20261107T070758Z-F01-96b8c7/
 │   ├── meta.json                     # frozen contract, validated at write time
 │   └── window.json                   # params, start/end, duration, HTTP status
-└── load-20261107T065722Z/            # Locust output (S2-B3, git-ignored)
+├── load-20261107T065722Z/            # Locust output (S2-B3, git-ignored)
+└── export-20261109T080825Z-f065dd/   # Prometheus -> Parquet (S2-B5, git-ignored)
+    ├── metrics.parquet               # long-format samples + units
+    └── manifest.json                 # range, coverage per query, config SHA
 ```
 
 - `meta.json` is written once by `experiments/harness/run_fault.py` and never
