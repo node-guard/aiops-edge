@@ -40,9 +40,30 @@ churn, not the fault). No pod restarted, no OOM kill, no readiness failure.
 
 ### Standard load cycle
 
-`make load PROFILE=standard` started **2026-11-09T07:19:03Z** (21-minute cycle)
-so the restarted soak is not a flat idle baseline. Result to be appended below
-when the cycle finishes.
+`make load PROFILE=standard` ran from **2026-11-09T07:19:03Z to 07:40:03Z**
+(21-minute cycle) so the restarted soak is not a flat idle baseline.
+
+| Endpoint | Requests | Failures | Median | p95 | Max |
+|---|---|---|---|---|---|
+| `GET /` | 3,873 | 0 | 3 ms | 4 ms | 16 ms |
+| `GET /health/live` | 1,957 | 0 | 3 ms | 4 ms | 9 ms |
+| `GET /health/ready` | 1,258 | 0 | 10 ms | 16 ms | 62 ms |
+| **Aggregated** | **7,088** | **0** | **3 ms** | **12 ms** | **62 ms** |
+
+Average 5.63 req/s. No failure and no restart; the burst stage (25 users) is
+visible only as a slightly higher `/health/ready` tail. Raw CSV stays in the
+git-ignored `experiments/runs/load-20261109T071903Z/`.
+
+### Daily check (2026-11-09T07:29Z)
+
+| Check | Result |
+|---|---|
+| Targets | 4/4 `up` |
+| `count_over_time(up[1h])` | 24 samples per series — Prometheus had only been up ~12 min, so this is the expected count, not a gap |
+| Head series / label pairs | 3,228 / 1,336 |
+| PVC | `Bound`, 5 GiB |
+| Retention | `1w` (168h) |
+| Pods | 5/5 monitoring + 3/3 `shop-demo` ready; restart count 1 = the VM boot only |
 
 ## 2026-11-08 — Lab VM off: soak interrupted
 
