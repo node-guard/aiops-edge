@@ -76,9 +76,9 @@ def test_raw_select_is_limited_to_tables_without_a_tenant_column() -> None:
                 assert node.args, function.name
                 target = node.args[0]
                 assert isinstance(target, ast.Name), (function.name, ast.dump(target))
-                assert (
-                    target.id in NON_TENANT_TABLES
-                ), f"{function.name} builds a raw select on {target.id}; use tenant_select instead"
+                assert target.id in NON_TENANT_TABLES, (
+                    f"{function.name} builds a raw select on {target.id}; use tenant_select instead"
+                )
 
 
 def test_repository_never_uses_unscoped_session_shortcuts() -> None:
