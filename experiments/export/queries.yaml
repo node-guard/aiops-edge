@@ -1,0 +1,100 @@
+# Query set for the Prometheus -> Parquet exporter (S2-B5).
+#
+# One entry per output metric:
+#   name        column value written to Parquet.metric; must be unique
+#   query       PromQL expression, evaluated with /api/v1/query_range
+#   unit        one of bool, bytes, bytes_per_second, count, load_average,
+#               ratio, seconds (the exporter rejects anything else)
+#   description optional, free text
+#   allow_empty optional, default false: a query that returns no series fails
+#               the export, because a missing metric must not silently become
+#               a missing feature; set true only for genuinely optional data.
+#
+# Selectors are written for the edge-stack chart (S2-B1): node-exporter series
+# carry the `node` label, kube-state-metrics keeps its real namespace/pod
+# labels. A query may be an expression, so the output metric name comes from
+# this file and not from the source metric's `__name__`.
+#
+# Values are exported as they are observed. Nothing is filled, interpolated or
+# clipped; a missing sample is a missing row.
+
+queries:
+  - name: node_cpu_busy_ratio
+    query: 1 - avg by (node) (rate(node_cpu_seconds_total{mode="idle"}[5m]))
+    unit: ratio
+    description: Fraction of non-idle CPU time over a 5 minute window per node.
+
+  - name: node_cpu_iowait_ratio
+    query: avg by (node) (rate(node_cpu_seconds_total{mode="iowait"}[5m]))
+    unit: ratio
+    description: Fraction of CPU time waiting on I/O; early disk-saturation signal.
+
+  - name: node_load1
+    query: node_load1
+    unit: load_average
+    description: 1 minute load average reported by the kernel.
+
+  - name: node_memory_available_bytes
+    query: node_memory_MemAvailable_bytes
+    unit: bytes
+    description: Memory available for new workloads (includes reclaimable cache).
+
+  - name: node_memory_total_bytes
+    query: node_memory_MemTotal_bytes
+    unit: bytes
+    description: Total usable RAM; the denominator for memory-pressure ratios.
+
+  - name: node_filesystem_avail_bytes
+    query: node_filesystem_avail_bytes{mountpoint="/"}
+    unit: bytes
+    description: Free space on the root filesystem only (ignores tmpfs/EFI mounts).
+
+  - name: node_filesystem_size_bytes
+    query: node_filesystem_size_bytes{mountpoint="/"}
+    unit: bytes
+    description: Size of the root filesystem; the denominator for disk ratios.
+
+  - name: node_disk_read_bytes_per_second
+    query: sum by (node) (rate(node_disk_read_bytes_total{device=~"vd.*"}[2m]))
+    unit: bytes_per_second
+    description: Physical disk read throughput, summed over virtio disks (loop/dm excluded).
+
+  - name: node_disk_write_bytes_per_second
+    query: sum by (node) (rate(node_disk_written_bytes_total{device=~"vd.*"}[2m]))
+    unit: bytes_per_second
+    description: Physical disk write throughput, summed over virtio disks.
+
+  - name: node_disk_io_time_ratio
+    query: rate(node_disk_io_time_seconds_total{device=~"vd.*"}[2m])
+    unit: ratio
+    description: Busy fraction per disk device; kept per device, not summed.
+
+  - name: node_network_receive_bytes_per_second
+    query: sum by (node) (rate(node_network_receive_bytes_total{device!~"lo|cni0|flannel.*|veth.*"}[2m]))
+    unit: bytes_per_second
+    description: Physical NIC receive throughput (virtual/container bridges excluded).
+
+  - name: node_network_transmit_bytes_per_second
+    query: sum by (node) (rate(node_network_transmit_bytes_total{device!~"lo|cni0|flannel.*|veth.*"}[2m]))
+    unit: bytes_per_second
+    description: Physical NIC transmit throughput.
+
+  - name: scrape_up
+    query: up
+    unit: bool
+    description: 1 when the last scrape succeeded, 0 otherwise; one series per target.
+
+  - name: pod_container_restarts_total
+    query: kube_pod_container_status_restarts_total
+    unit: count
+    description: Cumulative container restart count (monotonic, resets only on recreation).
+
+  - name: pod_ready
+    query: kube_pod_status_ready{condition="true"}
+    unit: bool
+    description: 1 when the pod reports Ready, 0 otherwise.
+
+  - name: deployment_replicas_available
+    query: kube_deployment_status_replicas_available
+    unit: count
+    description: Available replicas per deployment; 0 exposes full workload unavailability.
