@@ -1,4 +1,4 @@
-"""Migration round-trip against a real PostgreSQL (S1-A2).
+"""Migration round-trip against a real PostgreSQL (S1-A2, extended in S2-A1).
 
 Skipped unless ``AIOPS_TEST_DATABASE_URL`` is set, so a normal ``make check``
 never touches a database. The test drops every table it creates, so point it at
@@ -7,10 +7,7 @@ a throwaway database only.
 
 from __future__ import annotations
 
-import os
 import uuid
-from collections.abc import Iterator
-from pathlib import Path
 
 import pytest
 from alembic import command
@@ -19,7 +16,6 @@ from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import IntegrityError
 
-ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 EXPECTED_TABLES = {
     "tenants",
     "sites",
@@ -32,22 +28,13 @@ EXPECTED_TABLES = {
 }
 
 
-def _database_url() -> str:
-    url = os.environ.get("AIOPS_TEST_DATABASE_URL")
-    if not url:
-        pytest.skip("AIOPS_TEST_DATABASE_URL is not set")
-    return url
+def _engine(alembic_config: Config) -> Engine:
+    url = alembic_config.get_main_option("sqlalchemy.url")
+    assert url
+    return create_engine(url)
 
 
-@pytest.fixture()
-def alembic_config() -> Iterator[Config]:
-    config = Config(str(ALEMBIC_INI))
-    config.set_main_option("sqlalchemy.url", _database_url())
-    yield config
-
-
-def _tables() -> set[str]:
-    engine = create_engine(_database_url())
+def _tables(engine: Engine) -> set[str]:
     try:
         return set(inspect(engine).get_table_names())
     finally:
@@ -57,35 +44,14 @@ def _tables() -> set[str]:
 def test_upgrade_creates_base_tables(alembic_config: Config) -> None:
     command.upgrade(alembic_config, "head")
 
-    assert EXPECTED_TABLES <= _tables()
+    assert EXPECTED_TABLES <= _tables(_engine(alembic_config))
 
 
 def test_downgrade_removes_base_tables(alembic_config: Config) -> None:
     command.upgrade(alembic_config, "head")
     command.downgrade(alembic_config, "base")
 
-    assert not (EXPECTED_TABLES & _tables())
-
-
-@pytest.fixture()
-def db(alembic_config: Config) -> Iterator[Engine]:
-    """A migrated database, emptied afterwards so tests do not interfere."""
-    command.upgrade(alembic_config, "head")
-    engine = create_engine(_database_url())
-    yield engine
-    with engine.begin() as connection:
-        for table in (
-            "audit_events",
-            "incident_state_history",
-            "incident_links",
-            "events",
-            "incidents",
-            "sites",
-            "users",
-            "tenants",
-        ):
-            connection.execute(text(f"DELETE FROM {table}"))
-    engine.dispose()
+    assert not (EXPECTED_TABLES & _tables(_engine(alembic_config)))
 
 
 def _seed(connection: Connection) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
