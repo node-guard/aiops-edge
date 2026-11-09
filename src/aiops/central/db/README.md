@@ -62,6 +62,33 @@ AIOPS_TEST_DATABASE_URL='postgresql+psycopg://aiops:throwaway@127.0.0.1:55432/ai
 docker rm -f aiops-mig-test
 ```
 
+## Repositories (S2-A2)
+
+`repositories.py` is the only module allowed to build queries.
+
+- Every public function takes `tenant_id` as a **required keyword argument**
+  (no default, no `None`), so a caller cannot omit the filter. The tenant comes
+  from the authenticated identity (session or mTLS certificate), never from the
+  request body.
+- `tenant_select(model, tenant_id=...)` is the only builder for tenant-owned
+  tables; it always adds `WHERE tenant_id = :tenant_id`.
+- Tables without their own tenant column (`incident_links`,
+  `incident_state_history`) are reached only after the parent incident — or the
+  referenced site — has been loaded with the tenant filter.
+- A row outside the caller's tenant is reported as `TenantScopeError`, the same
+  error as "not found", so existence does not leak across tenants.
+- Sessions and commits belong to the caller; repository functions `flush()` so
+  the row is visible inside the caller's transaction.
+
+Static guard: `tests/unit/test_tenant_isolation_lint.py` fails if a public
+function loses its required `tenant_id`, if a raw `select()` targets a
+tenant-owned table, if `session.get()`/`session.execute()` is used, or if a
+module outside `central/db` builds a query.
+
+Behavioural proof: `tests/integration/test_repositories.py` seeds two tenants
+and checks that reads, updates, links and audit writes cannot cross them. It is
+skipped without `AIOPS_TEST_DATABASE_URL` (same fixture as the migration tests).
+
 ## Rules
 
 - Expand-and-contract: add nullable columns first, backfill, then tighten in a
